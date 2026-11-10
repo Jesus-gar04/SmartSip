@@ -1,0 +1,1473 @@
+/* ═══ La app emparejada: menú y secciones ═══════════════════════════════════
+ * Celular: barra inferior. Escritorio: barra lateral. Hoy: papel arriba y el
+ * agua que sube por la pantalla con cada sorbo.
+ * ═════════════════════════════════════════════════════════════════════════ */
+
+.principal {
+  --alto-menu: 68px;
+  min-height: 100svh;
+  background: var(--papel);
+}
+
+.principal-contenido {
+  min-height: 100svh;
+  padding-bottom: calc(var(--alto-menu) + env(safe-area-inset-bottom));
+}
+
+/* ─── Menú: barra inferior ─── */
+
+.menu {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 20;
+  padding-bottom: env(safe-area-inset-bottom);
+  border-top: var(--linea-fina) solid var(--linea);
+  background: var(--superficie);
+}
+
+.menu-logo,
+.menu-persona {
+  display: none;
+}
+
+.menu-lista {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.menu-item {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  width: 100%;
+  height: var(--alto-menu);
+  padding: var(--e2) 0;
+  border: 0;
+  background: none;
+  color: var(--texto-suave);
+  cursor: pointer;
+  transition: color var(--dur-micro) var(--curva);
+}
+
+.menu-icono svg {
+  width: 24px;
+  height: 24px;
+}
+
+.menu-nombre {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: var(--peso-medio);
+}
+
+.menu-item[aria-current='page'] {
+  color: var(--agua-texto);
+}
+
+/* La sección activa lleva una gota de agua encima, no una píldora. */
+.menu-item[aria-current='page']::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 28px;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: var(--agua);
+  transform: translateX(-50%);
+}
+
+/* ─── Menú: barra lateral en escritorio ─── */
+
+@media (min-width: 1024px) {
+  .principal {
+    --ancho-menu: 248px;
+  }
+
+  .principal-contenido {
+    margin-left: var(--ancho-menu);
+    padding-bottom: 0;
+  }
+
+  .menu {
+    top: 0;
+    right: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--e8);
+    width: var(--ancho-menu);
+    padding: var(--e6) var(--e4);
+    border-top: 0;
+    border-right: var(--linea-fina) solid var(--linea);
+    background: var(--papel);
+  }
+
+  .menu-logo {
+    display: block;
+    padding: 0 var(--e3);
+  }
+
+  .menu-lista {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--e1);
+  }
+
+  .menu-item {
+    grid-template-columns: 24px 1fr;
+    justify-items: start;
+    align-items: center;
+    gap: var(--e3);
+    height: 52px;
+    padding: 0 var(--e3);
+    border-radius: var(--radio-boton);
+    color: var(--tinta);
+  }
+
+  .menu-item:hover {
+    background: var(--relleno-suave);
+  }
+
+  .menu-nombre {
+    font-family: var(--f-funcion);
+    font-size: var(--t-funcion);
+    line-height: var(--l-funcion);
+    font-weight: var(--p-funcion);
+  }
+
+  .menu-item[aria-current='page'] {
+    background: var(--superficie);
+    color: var(--tinta);
+    outline: var(--linea-fina) solid var(--linea);
+  }
+
+  .menu-item[aria-current='page'] .menu-icono {
+    color: var(--agua-texto);
+  }
+
+  .menu-item[aria-current='page']::before {
+    top: 50%;
+    left: 0;
+    width: 3px;
+    height: 24px;
+    border-radius: 0 3px 3px 0;
+    transform: translateY(-50%);
+  }
+
+  .menu-persona {
+    display: grid;
+    gap: 2px;
+    margin: auto 0 0;
+    padding: var(--e3);
+    font-family: var(--fuente-display);
+    font-weight: var(--peso-negrita);
+  }
+
+  .menu-persona span {
+    color: var(--texto-suave);
+    font-family: var(--fuente-sans);
+    font-size: var(--t-etiqueta);
+    font-weight: var(--peso-regular);
+  }
+}
+
+/* ─── Hoy: el agua sube por la pantalla ─── */
+
+.hoy {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100svh - var(--alto-menu) - env(safe-area-inset-bottom));
+  overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+  .hoy {
+    min-height: 100svh;
+  }
+}
+
+.hoy-cabecera {
+  display: flex;
+  justify-content: flex-end;
+  padding: calc(var(--e4) + env(safe-area-inset-top)) var(--margen) 0;
+}
+
+.hoy-papel {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  align-content: start;
+  gap: var(--e3);
+  padding: var(--e6) var(--margen);
+}
+
+.hoy-agua {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 1;
+  /* De un fondo mínimo hasta la pantalla entera cuando se cumple la meta. */
+  height: calc(16% + var(--llenado) * 84%);
+  background: var(--agua);
+  color: var(--sobre-agua);
+  transition: height var(--dur-sorbo) var(--curva);
+}
+
+.hoy-agua .ola {
+  position: absolute;
+  bottom: calc(100% - 2px);
+  left: 0;
+  width: 200%;
+  height: 34px;
+  animation: ola var(--dur-ciclo-ola) linear infinite;
+}
+
+.hoy-agua .ola-atras {
+  bottom: calc(100% + 4px);
+  fill: var(--bruma);
+  animation-duration: calc(var(--dur-ciclo-ola) * 1.6);
+  animation-direction: reverse;
+}
+
+.hoy-agua .ola-frente {
+  fill: var(--agua);
+}
+
+.hoy-agua.agua-quieta .ola {
+  animation: none;
+}
+
+.hoy-cifra {
+  position: absolute;
+  top: var(--e6);
+  left: var(--margen);
+  right: var(--margen);
+  display: grid;
+  gap: var(--e1);
+}
+
+/* Si el agua aún no alcanza la cifra, la cifra flota encima de la ola, en tinta. */
+.hoy-cifra-arriba {
+  top: auto;
+  bottom: calc(100% + 48px);
+  color: var(--tinta);
+}
+
+.hoy-de {
+  font-family: var(--fuente-display);
+  font-size: var(--t-funcion);
+  font-weight: var(--peso-negrita);
+  opacity: 0.85;
+}
+
+.firma-sobre-agua {
+  color: var(--sobre-agua);
+  margin-top: var(--e3);
+}
+
+.hoy .burbuja {
+  position: absolute;
+  bottom: var(--e10);
+  border: var(--trazo) solid var(--sobre-agua);
+  border-radius: 50%;
+}
+
+.tarjeta-pregunta {
+  display: grid;
+  gap: var(--e3);
+  max-width: 460px;
+  margin-top: var(--e3);
+  padding: var(--e5);
+  border: var(--linea-fina) solid var(--linea);
+  border-radius: var(--radio-tarjeta);
+  background: var(--superficie);
+}
+
+.tarjeta-pregunta h2 {
+  margin: 0;
+  font-family: var(--f-funcion);
+  font-size: var(--t-funcion);
+  line-height: var(--l-funcion);
+  font-weight: var(--p-funcion);
+}
+
+.tarjeta-pregunta p {
+  color: var(--texto-suave);
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+}
+
+/* ─── Secciones sobre papel: Termo, Semana, Ajustes ─── */
+
+.seccion {
+  display: grid;
+  align-content: start;
+  gap: var(--e5);
+  max-width: 720px;
+  padding: calc(var(--e8) + env(safe-area-inset-top)) var(--margen) var(--e8);
+}
+
+.tarjetas {
+  display: grid;
+  gap: var(--e4);
+}
+
+.tarjeta-info {
+  display: grid;
+  gap: var(--e3);
+  padding: var(--e5);
+  border: var(--linea-fina) solid var(--linea);
+  border-radius: var(--radio-tarjeta);
+  background: var(--superficie);
+}
+
+.tarjeta-info h2 {
+  margin: 0;
+  font-family: var(--f-funcion);
+  font-size: var(--t-funcion);
+  line-height: var(--l-funcion);
+  font-weight: var(--p-funcion);
+}
+
+.tarjeta-info p {
+  color: var(--texto-suave);
+}
+
+.tarjeta-info a {
+  color: var(--agua-honda);
+}
+
+.tarjeta-info .boton {
+  justify-self: start;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="dia"]) .tarjeta-info a {
+    color: var(--agua-texto);
+  }
+}
+:root[data-tema="noche"] .tarjeta-info a {
+  color: var(--agua-texto);
+}
+
+/* La barra lateral queda fija: siempre del alto de la ventana, aunque la
+ * página crezca. Si no cabe (ventanas muy bajas), se desplaza por dentro. */
+@media (min-width: 1024px) {
+  .menu {
+    position: fixed;
+    top: 0;
+    bottom: auto;
+    left: 0;
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+/* ─── Semana: siete termos ─── */
+
+.seccion-semana {
+  max-width: 820px;
+}
+
+.semana-cabecera {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--e4);
+}
+
+.semana-nav {
+  display: flex;
+  gap: var(--e2);
+}
+
+.semana-flecha {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1.5px solid var(--tinta);
+  border-radius: var(--radio-boton);
+  background: none;
+  color: var(--tinta);
+  font-family: var(--fuente-display);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.semana-flecha:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.siete-termos {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--e2);
+  padding: var(--e5) var(--e3);
+  border: var(--linea-fina) solid var(--linea);
+  border-radius: var(--radio-tarjeta);
+  background: var(--superficie);
+}
+
+.termo-dia {
+  display: grid;
+  justify-items: center;
+  gap: var(--e2);
+  margin: 0;
+}
+
+.termo-dia-dibujo {
+  width: 100%;
+  max-width: 56px;
+  height: auto;
+}
+
+.termo-dia-tapa {
+  fill: none;
+  stroke: var(--tinta);
+  stroke-width: 2;
+}
+
+.termo-dia-contorno {
+  fill: none;
+  stroke: var(--tinta);
+  stroke-width: 2;
+}
+
+.termo-dia-agua {
+  fill: var(--agua);
+}
+
+.termo-dia figcaption {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+}
+
+.termo-dia-letra {
+  font-family: var(--fuente-display);
+  font-weight: var(--peso-negrita);
+}
+
+.termo-dia-ml {
+  color: var(--texto-suave);
+  font-size: 11px;
+  line-height: 14px;
+  white-space: nowrap;
+}
+
+.termo-dia-hoy .termo-dia-letra {
+  color: var(--agua-texto);
+}
+
+.termo-dia-hoy .termo-dia-contorno,
+.termo-dia-hoy .termo-dia-tapa {
+  stroke: var(--agua);
+}
+
+/* ─── Cómo bebes ─── */
+
+.ritmo {
+  display: grid;
+  gap: var(--e1);
+}
+
+.ritmo-horas {
+  display: grid;
+  grid-template-columns: repeat(24, 1fr);
+  gap: 2px;
+  height: 40px;
+}
+
+.ritmo-hora {
+  border-radius: 3px;
+  background: var(--agua);
+}
+
+.ritmo-etiquetas {
+  display: flex;
+  justify-content: space-between;
+  color: var(--texto-suave);
+  font-size: 11px;
+}
+
+.habitos {
+  display: grid;
+  gap: var(--e3);
+  margin: var(--e2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.habitos li {
+  position: relative;
+  padding-left: var(--e5);
+  color: var(--tinta);
+}
+
+/* Cada hábito lleva una gotita de agua, no una viñeta de lista. */
+.habitos li::before {
+  content: '';
+  position: absolute;
+  top: 0.5em;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50% 50% 50% 0;
+  background: var(--agua);
+  transform: rotate(-45deg);
+}
+
+/* ─── Los termos de la semana se tocan ─── */
+
+.termo-dia-boton {
+  padding: var(--e1) 0;
+  border: 0;
+  border-radius: var(--radio-boton);
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: background-color var(--dur-micro) var(--curva), transform var(--dur-micro) var(--curva);
+}
+
+.termo-dia-boton:hover {
+  background: var(--relleno-suave);
+}
+
+.termo-dia-boton:active {
+  transform: translateY(1px);
+}
+
+.semana-pista {
+  margin-top: calc(-1 * var(--e2));
+  text-align: center;
+}
+
+/* ─── Detalle de un día ─── */
+
+.detalle-dia {
+  width: min(560px, 100%);
+  max-width: 100%;
+  max-height: 92svh;
+  margin: auto auto 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radio-foto) var(--radio-foto) 0 0;
+  background: var(--papel);
+  color: var(--tinta);
+}
+
+.detalle-dia::backdrop {
+  background: rgba(36, 29, 24, 0.45);
+}
+
+@media (min-width: 720px) {
+  .detalle-dia {
+    margin: auto;
+    border-radius: var(--radio-foto);
+  }
+}
+
+.detalle-hoja {
+  display: grid;
+  gap: var(--e5);
+  padding: var(--e6) var(--margen) calc(var(--e8) + env(safe-area-inset-bottom));
+}
+
+.detalle-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e3);
+}
+
+.detalle-cerrar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1.5px solid var(--tinta);
+  border-radius: 50%;
+  background: none;
+  color: var(--tinta);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.detalle-resumen {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: var(--e5);
+  align-items: center;
+  padding: var(--e5);
+  border: var(--linea-fina) solid var(--linea);
+  border-radius: var(--radio-tarjeta);
+  background: var(--superficie);
+}
+
+.detalle-cifras {
+  display: grid;
+  justify-items: start;
+  gap: var(--e1);
+}
+
+.detalle-cifras .sello {
+  margin-top: var(--e2);
+}
+
+.datos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--e3);
+}
+
+@media (min-width: 560px) {
+  .datos {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.dato {
+  display: grid;
+  gap: 2px;
+  padding: var(--e4);
+  border: var(--linea-fina) solid var(--linea);
+  border-radius: var(--radio-tarjeta);
+  background: var(--superficie);
+}
+
+.dato-icono {
+  color: var(--agua-texto);
+}
+
+.dato-icono svg {
+  width: 22px;
+  height: 22px;
+}
+
+.dato-valor {
+  font-family: var(--fuente-display);
+  font-size: var(--t-titulo);
+  line-height: var(--l-titulo);
+  font-weight: 800;
+}
+
+.dato-nombre {
+  color: var(--texto-suave);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.detalle-seccion {
+  display: grid;
+  gap: var(--e3);
+}
+
+.detalle-seccion h3 {
+  margin: 0;
+  font-family: var(--f-funcion);
+  font-size: var(--t-funcion);
+  line-height: var(--l-funcion);
+  font-weight: var(--p-funcion);
+}
+
+/* ─── El día termo a termo: franjas, tandas, gotas ─── */
+
+.dia-franjas {
+  display: grid;
+  gap: var(--e5);
+}
+
+.dia-franja {
+  display: grid;
+  gap: var(--e2);
+}
+
+.dia-franja-cabecera {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0 var(--e1);
+}
+
+.dia-franja-nombre {
+  color: var(--texto-suave);
+  font-size: 12px;
+  font-weight: var(--peso-negrita);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dia-franja-total {
+  font-family: var(--fuente-display);
+  font-weight: 800;
+}
+
+.tandas {
+  display: grid;
+  gap: var(--e2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tanda {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: start;
+  gap: var(--e4);
+  padding: var(--e4);
+  border: var(--linea-fina) solid var(--linea);
+  border-radius: var(--radio-tarjeta);
+  background: var(--superficie);
+}
+
+.mini-termo {
+  display: block;
+  width: 28px;
+  height: auto;
+  margin-top: 2px;
+}
+
+.mini-termo-tapa {
+  fill: var(--tierra);
+}
+
+.mini-termo-borde {
+  fill: none;
+  stroke: var(--tinta);
+  stroke-width: 2;
+}
+
+.mini-termo-agua {
+  fill: var(--agua);
+}
+
+.mini-termo-tomado {
+  fill: var(--bruma);
+}
+
+.tanda-cuerpo {
+  display: grid;
+  justify-items: start;
+  gap: var(--e2);
+  min-width: 0;
+}
+
+.tanda-titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--e2);
+  margin: 0;
+  font-weight: var(--peso-negrita);
+}
+
+.tanda-titulo time {
+  font-family: var(--fuente-display);
+  font-size: var(--t-funcion);
+  font-weight: 800;
+}
+
+.tanda-resumen {
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+}
+
+.tanda-resumen strong {
+  color: var(--tinta);
+}
+
+.tanda-temp {
+  padding: 2px var(--e3);
+  border-radius: var(--radio-sello);
+  background: color-mix(in srgb, var(--agua) 12%, transparent);
+  color: var(--agua-texto);
+  font-size: 12px;
+  font-weight: var(--peso-negrita);
+  line-height: 20px;
+}
+
+/* La pista: una línea de tiempo corta con los sorbos como gotas. */
+.pista {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  padding: 0 9px;
+}
+
+.pista-linea {
+  position: relative;
+  height: 24px;
+}
+
+.pista-linea::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--linea);
+  transform: translateY(-50%);
+}
+
+.pista-gota,
+.pista-llenado {
+  position: absolute;
+  top: 50%;
+  border-radius: 50%;
+  translate: -50% -50%;
+}
+
+.pista-gota {
+  background: var(--agua);
+  opacity: 0.9;
+  box-shadow: 0 0 0 2px var(--superficie);
+}
+
+.pista-trago {
+  background: var(--agua-honda);
+}
+
+.pista-vaciado {
+  border: 2px dashed var(--texto-suave);
+  background: none;
+  box-shadow: none;
+}
+
+.pista-llenado {
+  width: 4px;
+  height: 18px;
+  border-radius: 2px;
+  background: var(--tinta);
+}
+
+.pista-horas {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 -9px;
+  color: var(--texto-suave);
+  font-size: 11px;
+  line-height: 14px;
+}
+
+.tanda-detalle {
+  width: 100%;
+}
+
+.tanda-detalle summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e1);
+  color: var(--agua-texto);
+  font-size: var(--t-etiqueta);
+  font-weight: var(--peso-negrita);
+  cursor: pointer;
+  list-style: none;
+}
+
+.tanda-detalle summary::-webkit-details-marker {
+  display: none;
+}
+
+.tanda-detalle summary::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  margin-left: 2px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  rotate: 45deg;
+  translate: 0 -2px;
+  transition: rotate var(--dur-micro) var(--curva), translate var(--dur-micro) var(--curva);
+}
+
+.tanda-detalle[open] summary::after {
+  rotate: 225deg;
+  translate: 0 2px;
+}
+
+.tanda-sorbos {
+  display: grid;
+  margin: var(--e2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tanda-sorbos li {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  gap: var(--e3);
+  padding: 6px 0;
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+}
+
+.tanda-sorbos li + li {
+  border-top: var(--linea-fina) solid var(--linea);
+}
+
+.tanda-sorbos time {
+  font-weight: var(--peso-negrita);
+}
+
+.tanda-sorbos li > span:last-child {
+  color: var(--texto-suave);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="dia"]) .mini-termo-borde {
+    stroke: var(--papel);
+  }
+}
+:root[data-tema="noche"] .mini-termo-borde {
+  stroke: var(--papel);
+}
+/* ─── Hoy: tres datos breves bajo la frase ─── */
+
+.hoy-datos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--e2);
+  max-width: 460px;
+  margin-top: var(--e2);
+}
+
+.hoy-datos .dato {
+  padding: var(--e3);
+}
+
+.hoy-datos .dato-valor {
+  font-size: var(--t-funcion);
+  line-height: var(--l-funcion);
+}
+
+/* ─── Termo: el termo es el protagonista ─── */
+
+.termo-protagonista {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--e4);
+  padding: var(--e5) var(--e4);
+  border: var(--linea-fina) solid var(--linea);
+  border-radius: var(--radio-foto);
+  background: var(--superficie);
+}
+
+@media (min-width: 560px) {
+  .termo-protagonista {
+    grid-template-columns: 128px minmax(0, 1fr);
+    gap: var(--e6);
+    padding: var(--e6);
+  }
+}
+
+.termo-protagonista-texto {
+  display: grid;
+  justify-items: start;
+  gap: var(--e2);
+}
+
+.termo-protagonista-cifra {
+  margin: 0;
+  font-family: var(--fuente-display);
+  font-size: clamp(34px, 10vw, 64px);
+  line-height: 1;
+  white-space: nowrap;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.seccion-termo .datos {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.hoy-datos .dato-valor,
+.seccion-termo .dato-valor {
+  white-space: nowrap;
+}
+
+@media (max-width: 559px) {
+  .seccion-termo .dato {
+    padding: var(--e3);
+  }
+
+  .seccion-termo .dato-valor {
+    font-size: var(--t-funcion);
+    line-height: var(--l-funcion);
+  }
+}
+
+.seccion-termo > .boton {
+  justify-self: start;
+}
+
+.tarjeta-con-icono {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--e4);
+}
+
+.tarjeta-con-icono > div {
+  display: grid;
+  gap: var(--e1);
+}
+
+.tarjeta-con-icono .funcion-circulo {
+  border-color: var(--agua-texto);
+  color: var(--agua-texto);
+}
+
+/* ─── Ajustes: cabecera con iniciales y filas agrupadas ─── */
+
+.perfil-cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--e4);
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--agua);
+  color: var(--sobre-agua);
+  font-family: var(--fuente-display);
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.perfil-nombre {
+  margin: 0;
+  font-family: var(--f-funcion);
+  font-size: var(--t-funcion);
+  line-height: var(--l-funcion);
+  font-weight: var(--p-funcion);
+}
+
+.grupo-ajustes {
+  display: grid;
+  overflow: hidden;
+  border: var(--linea-fina) solid var(--linea);
+  border-radius: var(--radio-tarjeta);
+  background: var(--superficie);
+}
+
+.grupo-ajustes > .sello {
+  margin: 0;
+  padding: var(--e4) var(--e5) var(--e1);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fila-ajuste {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--e4);
+  width: 100%;
+  min-height: 64px;
+  padding: var(--e3) var(--e5);
+  border: 0;
+  background: none;
+  color: var(--tinta);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--dur-micro) var(--curva);
+}
+
+.fila-ajuste + .fila-ajuste {
+  border-top: var(--linea-fina) solid var(--linea);
+}
+
+.fila-ajuste:hover {
+  background: color-mix(in srgb, var(--agua) 7%, transparent);
+}
+
+.fila-ajuste:focus-visible {
+  outline: 2px solid var(--agua);
+  outline-offset: -2px;
+}
+
+.fila-ajuste-icono {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--agua) 12%, transparent);
+  color: var(--agua-texto);
+}
+
+.fila-ajuste-icono svg {
+  width: 20px;
+  height: 20px;
+}
+
+.fila-ajuste-texto {
+  display: grid;
+  min-width: 0;
+}
+
+.fila-ajuste-titulo {
+  font-weight: var(--peso-negrita);
+}
+
+.fila-ajuste-detalle {
+  overflow: hidden;
+  color: var(--texto-suave);
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fila-ajuste > svg {
+  color: var(--texto-suave);
+}
+
+.fila-ajuste-salir {
+  color: var(--cacao);
+}
+
+.fila-ajuste-salir .fila-ajuste-icono {
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  color: currentColor;
+}
+
+.ajustes-pie {
+  text-align: center;
+}
+
+/* ─── Ajustes: filas con control ─── */
+
+.fila-control {
+  cursor: default;
+}
+
+.fila-control:hover {
+  background: none;
+}
+
+.fila-ajuste-detalle-largo {
+  overflow: visible;
+  white-space: normal;
+  text-wrap: pretty;
+}
+
+/* Control ancho (segmentado, horas, ejemplo): debajo del texto, alineado con él. */
+.fila-control-debajo {
+  grid-template-columns: auto minmax(0, 1fr);
+  row-gap: var(--e3);
+}
+
+.fila-control-debajo .fila-control-control {
+  display: grid;
+  grid-column: 2;
+  gap: var(--e3);
+  min-width: 0;
+}
+
+.fila-control-debajo .segmentado {
+  max-width: 420px;
+}
+
+.fila-extra {
+  margin: 0;
+  padding: 0 var(--e5) var(--e4) calc(var(--e5) + 40px + var(--e4));
+}
+
+.fila-extra .invitacion {
+  margin: 0;
+}
+
+.fila-nota {
+  color: var(--texto-suave);
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+}
+
+.fila-extra + .fila-ajuste {
+  border-top: var(--linea-fina) solid var(--linea);
+}
+
+@media (max-width: 480px) {
+  .fila-control-debajo .fila-control-control {
+    grid-column: 1 / -1;
+  }
+  .fila-extra {
+    padding-left: var(--e5);
+  }
+}
+
+/* Interruptor: píldora de agua cuando está encendido; el pulgar se desliza con resorte. */
+.interruptor {
+  position: relative;
+  flex: none;
+  width: 52px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radio-sello);
+  background: color-mix(in srgb, var(--tinta) 18%, transparent);
+  cursor: pointer;
+  transition: background-color var(--dur-transicion) var(--curva);
+}
+
+.interruptor[aria-checked='true'] {
+  background: var(--agua);
+}
+
+.interruptor:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.interruptor:focus-visible {
+  outline: 2px solid var(--agua);
+  outline-offset: 3px;
+}
+
+.interruptor-pulgar {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--superficie);
+  box-shadow: 0 1px 3px rgb(36 29 24 / 0.25);
+  transition: transform var(--dur-transicion) var(--curva);
+}
+
+.interruptor[aria-checked='true'] .interruptor-pulgar {
+  transform: translateX(20px);
+}
+
+/* Horario de silencio: dos horas, "desde … hasta …". */
+.silencio {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e2);
+}
+
+.selector-hora select {
+  min-height: 44px;
+  padding: 0 var(--e10) 0 var(--e3);
+  border: var(--linea-fina) solid var(--linea);
+  border-radius: var(--radio-boton);
+  background: var(--papel)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23857a70' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    no-repeat right 12px center;
+  color: var(--tinta);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  appearance: none;
+  cursor: pointer;
+}
+
+.selector-hora select:focus-visible {
+  outline: 2px solid var(--agua);
+  outline-offset: 2px;
+}
+
+.tono-ejemplo {
+  max-width: 420px;
+}
+
+/* ─── El aviso (manual, Notificacion) ─── */
+
+.notif {
+  display: flex;
+  gap: var(--e3);
+  align-items: flex-start;
+  padding: var(--e4);
+  border-radius: var(--radio-tarjeta);
+  background: var(--superficie);
+  box-shadow: 0 10px 30px rgb(36 29 24 / 0.12);
+  text-align: left;
+}
+
+.tono-ejemplo .notif {
+  border: var(--linea-fina) solid var(--linea);
+  box-shadow: none;
+}
+
+.notif-icono {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radio-boton);
+  background: var(--fondo-aviso);
+}
+
+.notif-texto {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-app {
+  display: flex;
+  justify-content: space-between;
+  color: var(--texto-suave);
+  font-size: 11px;
+  font-weight: var(--peso-negrita);
+  letter-spacing: 0.14em;
+}
+
+.notif-app span {
+  font-weight: var(--peso-regular);
+  letter-spacing: 0;
+}
+
+.notif-titulo {
+  margin-top: 2px;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: var(--peso-medio);
+}
+
+.notif-cuerpo {
+  margin-top: 2px;
+  color: var(--texto-suave);
+  font-size: 14px;
+}
+
+/* Arriba, centrado, por encima de todo; deja pasar los toques fuera del aviso. */
+.notif-capa {
+  position: fixed;
+  z-index: 50;
+  top: max(var(--e3), env(safe-area-inset-top));
+  right: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  padding: 0 var(--margen);
+  pointer-events: none;
+}
+
+.notif-boton {
+  width: min(100%, 400px);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radio-tarjeta);
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.notif-boton:focus-visible {
+  outline: 2px solid var(--agua);
+  outline-offset: 3px;
+}
+
+@media (min-width: 1024px) {
+  .notif-capa {
+    justify-content: flex-end;
+    padding-right: var(--e6);
+  }
+}
+
+/* ─── Software del termo (A4) ─── */
+
+.software-cuerpo {
+  gap: var(--e2) !important;
+}
+
+.software-cuerpo .boton {
+  justify-self: start;
+  margin-top: var(--e2);
+}
+
+.software-cuerpo > p:nth-of-type(2) {
+  color: var(--tinta);
+  text-wrap: pretty;
+}
+
+/* La barra: agua que avanza dentro de una píldora, con la cifra encima. */
+.software-barra {
+  position: relative;
+  overflow: hidden;
+  height: 28px;
+  margin-top: var(--e1);
+  border-radius: var(--radio-sello);
+  background: color-mix(in srgb, var(--agua) 14%, transparent);
+}
+
+.software-barra > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: var(--agua);
+  transition: width var(--dur-transicion) var(--curva);
+}
+
+.software-barra > em {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--tinta);
+  font-size: var(--t-etiqueta);
+  font-style: normal;
+  font-weight: var(--peso-negrita);
+  mix-blend-mode: normal;
+}
+
+.software-barra-pausa > span {
+  background: color-mix(in srgb, var(--agua) 45%, transparent);
+}
+
+.software-barra-instalando > span {
+  animation: software-latido 1.4s var(--curva-fundido) infinite alternate;
+}
+
+.software-barra-instalando > em {
+  color: var(--sobre-agua);
+}
+
+@keyframes software-latido {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .software-barra > span {
+    transition: none;
+  }
+  .software-barra-instalando > span {
+    animation: none;
+  }
+}

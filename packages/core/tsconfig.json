@@ -1,0 +1,6 @@
+{
+  // Solo el código del núcleo, sin tipos de Node ni del DOM:
+  // si algo de src/ usa window, document o process, no compila.
+  "extends": "../../tsconfig.base.json",
+  "include": ["src"]
+}

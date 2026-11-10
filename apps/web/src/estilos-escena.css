@@ -1,0 +1,735 @@
+/* ═══ Escenas del primer uso ═════════════════════════════════════════════════
+ * Papel con una sola intención y el agua con el termo que se llena.
+ * Celular: papel arriba, agua abajo. Escritorio: papel a la izquierda, agua a
+ * la derecha, a toda la altura.
+ * ═════════════════════════════════════════════════════════════════════════ */
+
+.escena {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+  background: var(--papel);
+}
+
+.escena-papel {
+  display: grid;
+  align-content: start;
+  gap: var(--e4);
+  /* Abajo queda aire para que el termo asome sin tapar nada. */
+  padding: calc(var(--e5) + env(safe-area-inset-top)) var(--margen) calc(var(--e16) + var(--e8));
+}
+
+.escena-logo {
+  margin-bottom: var(--e4);
+}
+
+.escena-agua {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: var(--e5);
+  flex: 1 0 auto;
+  min-height: 300px;
+  padding: var(--e6) var(--margen) calc(var(--e8) + env(safe-area-inset-bottom));
+  background: var(--agua);
+  color: var(--sobre-agua);
+}
+
+.escena-agua .ola {
+  position: absolute;
+  bottom: calc(100% - 2px);
+  left: 0;
+  width: 200%;
+  height: 34px;
+  animation: ola var(--dur-ciclo-ola) linear infinite;
+}
+
+.escena-agua .ola-atras {
+  bottom: calc(100% + 4px);
+  fill: var(--bruma);
+  animation-duration: calc(var(--dur-ciclo-ola) * 1.6);
+  animation-direction: reverse;
+}
+
+.escena-agua .ola-frente {
+  fill: var(--agua);
+}
+
+.escena-agua.agua-quieta .ola {
+  animation: none;
+}
+
+.escena-termo {
+  width: 112px;
+  margin-top: -84px; /* el termo asoma por encima de la ola */
+}
+
+.escena-agua-texto {
+  max-width: 360px;
+  text-align: center;
+}
+
+.escena-promesa {
+  font-family: var(--f-funcion);
+  font-size: var(--t-funcion);
+  line-height: var(--l-funcion);
+  font-weight: var(--p-funcion);
+}
+
+.escena-meta {
+  display: grid;
+  justify-items: center;
+  gap: var(--e1);
+}
+
+.escena-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e5);
+  margin-top: var(--e2);
+}
+
+.escena-acciones .boton-principal {
+  width: auto;
+  min-width: 200px;
+}
+
+@media (min-width: 1024px) {
+  .escena {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(380px, 0.9fr);
+  }
+
+  .escena-papel {
+    align-content: center;
+    justify-self: center;
+    width: 100%;
+    max-width: 560px;
+    padding: var(--e12) var(--e10);
+  }
+
+  .escena-logo {
+    position: absolute;
+    top: var(--e8);
+    left: var(--e10);
+  }
+
+  .escena-agua {
+    position: sticky;
+    top: 0;
+    align-content: center;
+    height: 100svh;
+    min-height: 0;
+    padding: var(--e12) var(--e10);
+  }
+
+  /* En escritorio la ola corre en vertical: el agua entra por la izquierda. */
+  .escena-agua .ola {
+    display: none;
+  }
+
+  .escena-termo {
+    width: 200px;
+    margin-top: 0;
+  }
+}
+
+/* ─── El termo dibujado: el producto real, beige, con su agua dentro ─── */
+
+.escena-termo {
+  position: relative;
+  z-index: 3; /* siempre por delante de la ola */
+}
+
+.termo-dibujo {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.termo-dibujo-trazo {
+  fill: none;
+  stroke: var(--tinta-fija);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.termo-dibujo-cuerpo {
+  fill: #c9b9a6;
+}
+
+.termo-dibujo-trazo:is(rect) {
+  fill: #c9b9a6;
+}
+
+.termo-dibujo-correa {
+  fill: none;
+  stroke: #4d4238;
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.termo-dibujo-agua-relleno {
+  fill: var(--agua-honda);
+}
+
+.termo-dibujo-pantalla {
+  fill: #1a1511;
+}
+
+.termo-dibujo-texto {
+  fill: #f2ebe4;
+  font-family: var(--fuente-display);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+/* ─── Notificaciones flotantes (como en el flyer) ─── */
+
+.notificaciones {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .escena-agua {
+    grid-template-columns: 1fr;
+  }
+
+  /* Por delante del termo, como en el flyer: el aviso se lee completo. */
+  .notificaciones {
+    position: absolute;
+    z-index: 4;
+    inset: 0;
+    display: block;
+    pointer-events: none;
+  }
+
+  .notificacion {
+    position: absolute;
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: var(--e3);
+    align-items: center;
+    width: 300px;
+    padding: var(--e3) var(--e4);
+    border-radius: var(--radio-tarjeta);
+    background: var(--superficie);
+    color: var(--tinta);
+    box-shadow: 0 10px 30px rgb(36 29 24 / 0.18);
+  }
+
+  .notificacion:nth-child(1) {
+    top: 18%;
+    left: 8%;
+    transform: rotate(-3deg);
+  }
+
+  .notificacion:nth-child(2) {
+    bottom: 22%;
+    right: 6%;
+    transform: rotate(2deg);
+  }
+
+  .notificacion-icono {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #241d18;
+    color: var(--gota);
+  }
+
+  .notificacion-titulo {
+    font-size: var(--t-aviso);
+    line-height: var(--l-aviso);
+    font-weight: var(--p-aviso);
+  }
+
+  .notificacion-texto {
+    color: var(--texto-suave);
+    font-size: var(--t-etiqueta);
+    line-height: var(--l-etiqueta);
+  }
+}
+
+/* ─── Pasos ─── */
+
+.pasos-progreso {
+  display: flex;
+  gap: var(--e2);
+  margin: 0 0 var(--e2);
+  padding: 0;
+  list-style: none;
+}
+
+.paso {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  color: var(--texto-suave);
+  font-size: var(--t-etiqueta);
+}
+
+.paso + .paso::before {
+  content: '';
+  width: 20px;
+  height: 1.5px;
+  margin-right: var(--e1);
+  background: var(--borde);
+}
+
+.paso-marca {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: var(--trazo) solid var(--borde);
+  border-radius: 50%;
+  font-family: var(--fuente-display);
+  font-weight: var(--peso-negrita);
+  font-size: 12px;
+}
+
+.paso-actual {
+  color: var(--tinta);
+  font-weight: var(--peso-medio);
+}
+
+.paso-actual .paso-marca {
+  border-color: var(--agua);
+  background: var(--agua);
+  color: var(--sobre-agua);
+}
+
+.paso-hecho .paso-marca {
+  border-color: var(--tinta);
+  color: var(--tinta);
+}
+
+@media (max-width: 420px) {
+  .paso:not(.paso-actual) .paso-nombre {
+    display: none;
+  }
+}
+
+/* ─── Funciones de la bienvenida ─── */
+
+.funciones {
+  display: grid;
+  gap: var(--e4);
+  margin: var(--e3) 0;
+}
+
+.funcion {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: var(--e3);
+  align-items: center;
+}
+
+.funcion-titulo {
+  font-family: var(--f-funcion);
+  font-size: var(--t-funcion);
+  line-height: var(--l-funcion);
+  font-weight: var(--p-funcion);
+}
+
+.funcion-texto {
+  color: var(--texto-suave);
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+}
+
+/* ─── Formularios ─── */
+
+.tarjeta-formulario {
+  padding: var(--e5);
+  border: var(--linea-fina) solid var(--linea);
+  border-radius: var(--radio-tarjeta);
+  background: var(--superficie);
+}
+
+.campo-caja {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  min-height: 52px;
+  padding: 0 var(--e3) 0 var(--e4);
+  border: 1.5px solid var(--borde);
+  border-radius: var(--radio-boton);
+  background: var(--superficie);
+  transition: border-color var(--dur-micro) var(--curva), box-shadow var(--dur-micro) var(--curva);
+}
+
+.campo-caja:focus-within {
+  border-color: var(--agua);
+  outline: 2px solid var(--agua);
+  outline-offset: 1px;
+}
+
+.campo-caja input:not([type='range']) {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  outline: none;
+}
+
+.campo-caja input:not([type='range']):focus-visible {
+  outline: none;
+}
+
+.campo-icono {
+  display: inline-flex;
+  color: var(--texto-suave);
+}
+
+.campo-icono svg {
+  width: 20px;
+  height: 20px;
+}
+
+.campo-ver {
+  padding: var(--e1) var(--e2);
+  border: 0;
+  background: none;
+  color: var(--agua-honda);
+  font-size: var(--t-etiqueta);
+  font-weight: var(--peso-medio);
+  cursor: pointer;
+}
+
+.aviso-app {
+  border-color: var(--tinta);
+  background: var(--superficie);
+}
+
+.campo-peso .deslizador-cabecera output {
+  font-size: var(--t-titulo);
+  line-height: var(--l-titulo);
+}
+
+.actividades {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--e2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.actividades legend {
+  margin-bottom: var(--e2);
+  padding: 0;
+}
+
+.actividad {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: var(--e1);
+  padding: var(--e3);
+  border: 1.5px solid var(--borde);
+  border-radius: var(--radio-boton);
+  background: var(--superficie);
+  cursor: pointer;
+  transition: border-color var(--dur-micro) var(--curva), background-color var(--dur-micro) var(--curva);
+}
+
+.actividad input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.actividad:has(input:focus-visible) {
+  outline: 2px solid var(--agua);
+  outline-offset: 2px;
+}
+
+.actividad-elegida {
+  border-color: var(--agua);
+  outline: 1.5px solid var(--agua);
+}
+
+.actividad-icono {
+  color: var(--agua-texto);
+}
+
+.actividad-nombre {
+  font-family: var(--fuente-display);
+  font-weight: var(--peso-negrita);
+}
+
+.actividad-texto {
+  color: var(--texto-suave);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/* ─── El código ─── */
+
+.codigo-cajas {
+  display: flex;
+  gap: clamp(4px, 1.6vw, 8px);
+  max-width: 100%;
+  margin: var(--e2) 0;
+}
+
+.codigo-caja {
+  display: grid;
+  place-items: center;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 48px;
+  height: 64px;
+  border: 1.5px solid var(--borde);
+  border-radius: var(--radio-boton);
+  background: var(--superficie);
+  font-family: var(--fuente-display);
+  font-size: clamp(24px, 7vw, 32px);
+  font-weight: 800;
+}
+
+.codigo-caja-separada {
+  margin-left: var(--e3);
+}
+
+.codigo-cajas-vencido .codigo-caja {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
+.codigo-tiempo {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  color: var(--texto-suave);
+  font-size: var(--t-etiqueta);
+}
+
+.codigo-tiempo svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 380px) {
+  .codigo-caja {
+    height: 56px;
+  }
+}
+
+/* Titular grande pero de una línea menos que la pregunta de portada. */
+.pregunta-media {
+  font-size: clamp(36px, 9vw, 48px);
+}
+
+/* ═══ Entrar: el formulario es el centro de todo ═══════════════════════════
+ * Detrás y a los costados, detalles tenues (siluetas del termo, avisos de la
+ * app, la ola) que dan contexto sin robarle protagonismo.
+ */
+
+.acceso {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 100svh;
+  padding: var(--e8) var(--margen) var(--e16);
+  overflow: hidden;
+  background: var(--papel);
+}
+
+.acceso-fondo {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.acceso-agua {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 18svh;
+  background: var(--agua);
+}
+
+.acceso-agua .ola {
+  position: absolute;
+  bottom: calc(100% - 2px);
+  left: 0;
+  width: 200%;
+  height: 34px;
+  animation: ola var(--dur-ciclo-ola) linear infinite;
+}
+
+.acceso-agua .ola-atras {
+  bottom: calc(100% + 4px);
+  fill: var(--bruma);
+  animation-duration: calc(var(--dur-ciclo-ola) * 1.6);
+  animation-direction: reverse;
+}
+
+.acceso-agua .ola-frente {
+  fill: var(--agua);
+}
+
+.agua-quieta .acceso-agua .ola {
+  animation: none;
+}
+
+.acceso-termo,
+.acceso-aviso {
+  display: none;
+}
+
+.acceso-tarjeta {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  gap: var(--e3);
+  width: 100%;
+  max-width: 440px;
+  padding: var(--e8) var(--e6);
+  border: var(--linea-fina) solid var(--linea);
+  border-radius: var(--radio-foto);
+  background: var(--superficie);
+  text-align: center;
+}
+
+.acceso-logo {
+  width: 72px;
+  height: auto;
+  margin-bottom: var(--e2);
+}
+
+.acceso-tarjeta .formulario {
+  width: 100%;
+  margin-top: var(--e3);
+  text-align: left;
+}
+
+.acceso-tarjeta .firma {
+  transform: rotate(-2deg);
+  transform-origin: center;
+}
+
+@media (min-width: 900px) {
+  /* Las siluetas del termo, tenues, a los costados. */
+  .acceso-termo {
+    position: absolute;
+    bottom: 10svh;
+    display: block;
+    width: 150px;
+    opacity: 0.22;
+  }
+
+  .acceso-termo-izq {
+    left: 7%;
+    transform: rotate(-6deg);
+  }
+
+  .acceso-termo-der {
+    right: 7%;
+    transform: rotate(5deg);
+  }
+
+  .acceso-tarjeta {
+    padding: var(--e10) var(--e10);
+  }
+}
+
+@media (min-width: 1200px) {
+  /* Los avisos de la app, atenuados y pequeños, arriba a los costados. */
+  .acceso-aviso {
+    position: absolute;
+    top: 16%;
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: var(--e3);
+    align-items: center;
+    width: 260px;
+    padding: var(--e3) var(--e4);
+    border: var(--linea-fina) solid var(--linea);
+    border-radius: var(--radio-tarjeta);
+    background: var(--superficie);
+    opacity: 0.6;
+  }
+
+  .acceso-aviso .notificacion-icono {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: #241d18;
+    color: var(--gota);
+  }
+
+  .acceso-aviso .notificacion-titulo {
+    font-size: 14px;
+    line-height: 18px;
+    font-weight: 600;
+  }
+
+  .acceso-aviso .notificacion-texto {
+    color: var(--texto-suave);
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  .acceso-aviso-izq {
+    left: 5%;
+    transform: rotate(-3deg);
+  }
+
+  .acceso-aviso-der {
+    top: 24%;
+    right: 5%;
+    transform: rotate(2deg);
+  }
+}
+
+/* Que la tarjeta nunca sea más ancha que la pantalla (ancho mínimo automático de la cuadrícula). */
+.acceso {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.acceso-tarjeta {
+  justify-self: center;
+  min-width: 0;
+}
+
+@media (max-width: 899px) {
+  .acceso-tarjeta {
+    padding: var(--e6) var(--e5);
+  }
+}
+
+/* La columna de la tarjeta toma su ancho, no el del contenido: los campos no se salen. */
+.acceso-tarjeta {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Los formularios tampoco crecen por el ancho natural de un campo de texto. */
+.formulario {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* El campo de texto no impone su ancho natural: se ajusta al espacio que deja
+ * el ícono y, en la contraseña, el botón Mostrar. */
+.campo {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.campo-caja input:not([type='range']) {
+  width: 0;
+}

@@ -1,0 +1,343 @@
+rules_version = '2';
+
+// Reglas de seguridad de SmartSip.
+//
+// - Cada persona solo lee y escribe lo suyo, bajo users/{uid}.
+// - Cada documento se valida campo por campo: nada de campos de más ni de
+//   valores fuera de rango.
+// - Un evento se crea una sola vez y no se borra. Lo único que cambia después
+//   es la respuesta a "¿Lo bebiste o lo vaciaste?", y solo una vez. Esto hace
+//   idempotente el registro: reenviar un evento no suma dos veces.
+// - Los totales del día solo crecen.
+// - El emparejamiento por código une una cuenta con un termo, una sola vez.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Utilidades ─────────────────────────────────────────────────────────
+
+    function esDueno(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function esNumero(v) {
+      return v is int || v is float;
+    }
+
+    function entre(v, min, max) {
+      return esNumero(v) && v >= min && v <= max;
+    }
+
+    function numeroONulo(v, min, max) {
+      return v == null || entre(v, min, max);
+    }
+
+    function textoONulo(v, max) {
+      return v == null || (v is string && v.size() <= max);
+    }
+
+    function esFecha(v) {
+      return v is string && v.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+    }
+
+    function esTermoId(v) {
+      return v is string && v.matches('^[A-Za-z0-9-]{1,40}$');
+    }
+
+    function esCodigo(v) {
+      return v is string && v.matches('^[0-9]{6}$');
+    }
+
+    // La marca de actualización solo puede ser la hora del servidor; si la
+    // escritura no la trae (merge), se conserva la que ya había.
+    function sinMarcaOAhora(d) {
+      return !('actualizadoEn' in d)
+        || d.actualizadoEn == request.time
+        || (resource != null && resource.data.get('actualizadoEn', null) == d.actualizadoEn);
+    }
+
+    // ─── Perfil ─────────────────────────────────────────────────────────────
+
+    function perfilValido(d) {
+      return d.keys().hasOnly(['nombre', 'pesoKg', 'actividad', 'unidad', 'brillo', 'desfaseMin', 'termoId', 'recordatorio', 'actualizadoEn'])
+        && d.keys().hasAll(['pesoKg', 'actividad', 'unidad', 'brillo', 'desfaseMin'])
+        && textoONulo(d.get('nombre', null), 60)
+        && entre(d.pesoKg, 20, 300)
+        && d.actividad in ['baja', 'media', 'alta']
+        && d.unidad in ['C', 'F']
+        && d.brillo in ['bajo', 'medio', 'alto']
+        && d.desfaseMin is int && d.desfaseMin >= -720 && d.desfaseMin <= 840
+        && (d.get('termoId', null) == null || esTermoId(d.termoId))
+        && (!('recordatorio' in d) || recordatorioValido(d.recordatorio))
+        && sinMarcaOAhora(d);
+    }
+
+    function esHora(v) {
+      return v is int && v >= 0 && v <= 23;
+    }
+
+    // U4: ritmo, horario de silencio y tono de los mensajes.
+    function recordatorioValido(r) {
+      return r is map
+        && r.keys().hasOnly(['activos', 'silencioDesde', 'silencioHasta', 'tono'])
+        && r.keys().hasAll(['activos', 'silencioDesde', 'silencioHasta', 'tono'])
+        && r.activos is bool
+        && esHora(r.silencioDesde)
+        && esHora(r.silencioHasta)
+        && r.tono in ['sereno', 'directo'];
+    }
+
+    // ─── Termo ──────────────────────────────────────────────────────────────
+
+    function lugarValido(l) {
+      return l == null
+        || (l is map
+          && l.keys().hasOnly(['lat', 'lng', 'precisionM'])
+          && entre(l.lat, -90, 90)
+          && entre(l.lng, -180, 180)
+          && entre(l.precisionM, 0, 100000));
+    }
+
+    function ultimoVistoValido(v) {
+      return v == null
+        || (v is map
+          && v.keys().hasOnly(['en', 'lugar'])
+          && v.en is timestamp
+          && lugarValido(v.get('lugar', null)));
+    }
+
+    function termoValido(d) {
+      return d.keys().hasOnly(['nombre', 'capacidadMl', 'firmware', 'bateria', 'temperaturaC', 'ultimoVisto', 'actualizadoEn'])
+        && textoONulo(d.get('nombre', null), 40)
+        && numeroONulo(d.get('capacidadMl', null), 100, 2000)
+        && textoONulo(d.get('firmware', null), 40)
+        && numeroONulo(d.get('bateria', null), 0, 1)
+        && numeroONulo(d.get('temperaturaC', null), -30, 130)
+        && ultimoVistoValido(d.get('ultimoVisto', null))
+        && sinMarcaOAhora(d);
+    }
+
+    // ─── Eventos ────────────────────────────────────────────────────────────
+
+    function eventoValido(clave, d) {
+      return d.keys().hasOnly(['termoId', 'id', 'tipo', 'ml', 'nivelMl', 'en', 'dia', 'hora', 'temperaturaC', 'estado'])
+        && d.keys().hasAll(['termoId', 'id', 'tipo', 'ml', 'nivelMl', 'en', 'dia', 'hora', 'temperaturaC', 'estado'])
+        && esTermoId(d.termoId)
+        && d.id is int && d.id >= 1
+        // La clave es termoId_0000000123: no se puede crear el mismo evento con otra clave.
+        && clave.matches('^' + d.termoId + '_[0-9]{10}$')
+        && int(clave.split('_')[1]) == d.id
+        && d.tipo in ['llenado', 'sorbo', 'descensoGrande']
+        && entre(d.ml, 0, 5000)
+        && entre(d.nivelMl, 0, 5000)
+        && d.en is timestamp
+        && esFecha(d.dia)
+        && d.hora is int && d.hora >= 0 && d.hora <= 23
+        && numeroONulo(d.temperaturaC, -30, 130)
+        && ((d.tipo == 'descensoGrande' && d.estado == 'pendiente')
+          || (d.tipo != 'descensoGrande' && d.estado == 'registrado'));
+    }
+
+    function resolucionValida(antes, despues) {
+      return antes.tipo == 'descensoGrande'
+        && antes.estado == 'pendiente'
+        && despues.estado in ['bebido', 'vaciado']
+        && despues.diff(antes).affectedKeys().hasOnly(['estado', 'resueltoEn'])
+        && despues.resueltoEn == request.time;
+    }
+
+    // ─── Días ───────────────────────────────────────────────────────────────
+
+    function horasValidas(d) {
+      return !('porHora' in d)
+        || (d.porHora is map
+          && d.porHora.keys().hasOnly(['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11',
+                                       '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23']));
+    }
+
+    function diaValido(fecha, d) {
+      return d.keys().hasOnly(['fecha', 'totalMl', 'sorbos', 'porHora', 'llenados', 'llenadoMl',
+                               'tempSumaC', 'tempMuestras', 'metaMl', 'climaC', 'actualizadoEn'])
+        && d.fecha == fecha
+        && entre(d.get('totalMl', 0), 0, 50000)
+        && entre(d.get('sorbos', 0), 0, 5000)
+        && horasValidas(d)
+        && entre(d.get('llenados', 0), 0, 1000)
+        && entre(d.get('llenadoMl', 0), 0, 500000)
+        && entre(d.get('tempSumaC', 0), -150000, 650000)
+        && entre(d.get('tempMuestras', 0), 0, 5000)
+        && numeroONulo(d.get('metaMl', null), 500, 10000)
+        && numeroONulo(d.get('climaC', null), -30, 60)
+        && sinMarcaOAhora(d);
+    }
+
+    function noDisminuye(campo) {
+      return resource == null || request.resource.data.get(campo, 0) >= resource.data.get(campo, 0);
+    }
+
+    // ─── Emparejamiento por código (U1) ─────────────────────────────────────
+    // La app crea el código; el termo (otro usuario) lo reclama una sola vez
+    // y antes de que venza. El código de 6 dígitos es el único secreto: se
+    // puede leer sabiéndolo, pero no listar.
+
+    function codigoNuevoValido(d) {
+      return d.keys().hasOnly(['uid', 'estado', 'creadoEn', 'expiraEn'])
+        && d.uid == request.auth.uid
+        && d.estado == 'esperando'
+        && d.creadoEn == request.time
+        && d.expiraEn is timestamp
+        && d.expiraEn > request.time
+        && d.expiraEn <= request.time + duration.value(15, 'm');
+    }
+
+    function reclamoValido(antes, despues) {
+      return antes.estado == 'esperando'
+        && request.time < antes.expiraEn
+        && despues.diff(antes).affectedKeys().hasOnly(['estado', 'termoId', 'termoUid', 'emparejadoEn'])
+        && despues.estado == 'emparejado'
+        && despues.termoUid == request.auth.uid
+        && esTermoId(despues.termoId)
+        && despues.emparejadoEn == request.time;
+    }
+
+    // ─── Canal entre la app de una persona y su termo ───────────────────────
+    // Solo lo abre la persona, y solo con el termo que reclamó su código.
+
+    function canalValido(canalId, d) {
+      let e = get(/databases/$(database)/documents/emparejamientos/$(d.codigo)).data;
+      return d.keys().hasOnly(['uid', 'termoUid', 'termoId', 'codigo', 'creadoEn'])
+        && d.uid == request.auth.uid
+        && esTermoId(d.termoId)
+        && esCodigo(d.codigo)
+        && canalId == d.uid + '_' + d.termoId
+        && d.creadoEn == request.time
+        && e.uid == request.auth.uid
+        && e.estado == 'emparejado'
+        && e.termoUid == d.termoUid
+        && e.termoId == d.termoId;
+    }
+
+    function canalDe(canalId) {
+      return get(/databases/$(database)/documents/canales/$(canalId)).data;
+    }
+
+    function esParteDelCanal(canalId) {
+      return request.auth != null
+        && (request.auth.uid == canalDe(canalId).uid || request.auth.uid == canalDe(canalId).termoUid);
+    }
+
+    function esDuenoDelCanal(canalId) {
+      return request.auth != null && request.auth.uid == canalDe(canalId).uid;
+    }
+
+    // Lo que la app le cuenta al termo para que decida los recordatorios
+    // aunque la app esté cerrada (meta, ritmo y ajustes; nada más).
+    function ritmoValido(d) {
+      return d.keys().hasOnly(['fecha', 'desfaseMin', 'metaMl', 'curva', 'deHabito', 'ajustes', 'totalMlApp', 'actualizadoEn'])
+        && d.keys().hasAll(['fecha', 'desfaseMin', 'metaMl', 'curva', 'deHabito', 'ajustes', 'totalMlApp', 'actualizadoEn'])
+        && esFecha(d.fecha)
+        && d.desfaseMin is int && d.desfaseMin >= -720 && d.desfaseMin <= 840
+        && entre(d.metaMl, 500, 10000)
+        && d.curva is list && d.curva.size() == 25
+        && d.deHabito is bool
+        && recordatorioValido(d.ajustes)
+        && entre(d.totalMlApp, 0, 50000)
+        && d.actualizadoEn == request.time;
+    }
+
+    // Una suscripción Web Push de un celular de la persona.
+    function dispositivoValido(d) {
+      return d.keys().hasOnly(['endpoint', 'p256dh', 'auth', 'creadoEn'])
+        && d.endpoint is string && d.endpoint.size() <= 1000 && d.endpoint.matches('^https://.+')
+        && d.p256dh is string && d.p256dh.size() <= 200
+        && d.auth is string && d.auth.size() <= 100
+        && d.creadoEn == request.time;
+    }
+
+    function mensajeValido(canalId, d) {
+      return d.keys().hasOnly(['de', 'seq', 'cuerpo', 'enMs', 'creadoEn'])
+        && d.seq is int
+        && esNumero(d.enMs)
+        && d.cuerpo is map
+        && d.cuerpo.tipo is string
+        && d.creadoEn == request.time
+        && ((d.de == 'termo' && request.auth.uid == canalDe(canalId).termoUid)
+          || (d.de == 'app' && request.auth.uid == canalDe(canalId).uid));
+    }
+
+    // ─── Rutas ──────────────────────────────────────────────────────────────
+
+    match /users/{uid} {
+      allow read: if esDueno(uid);
+      allow create, update: if esDueno(uid) && perfilValido(request.resource.data);
+      allow delete: if false;
+
+      match /termos/{termoId} {
+        allow read: if esDueno(uid);
+        allow create, update: if esDueno(uid) && esTermoId(termoId) && termoValido(request.resource.data);
+        allow delete: if esDueno(uid);
+      }
+
+      match /eventos/{clave} {
+        allow read: if esDueno(uid);
+        allow create: if esDueno(uid) && eventoValido(clave, request.resource.data);
+        allow update: if esDueno(uid) && resolucionValida(resource.data, request.resource.data);
+        allow delete: if false;
+      }
+
+      match /dias/{fecha} {
+        allow read: if esDueno(uid);
+        allow create, update: if esDueno(uid)
+          && esFecha(fecha)
+          && diaValido(fecha, request.resource.data)
+          && noDisminuye('totalMl')
+          && noDisminuye('sorbos')
+          && noDisminuye('llenados');
+        allow delete: if false;
+      }
+    }
+
+    match /emparejamientos/{codigo} {
+      allow get: if request.auth != null && esCodigo(codigo);
+      allow list: if false;
+      allow create: if request.auth != null && esCodigo(codigo) && codigoNuevoValido(request.resource.data);
+      allow update: if request.auth != null && esCodigo(codigo) && (
+        // Reusar un código que ya venció.
+        (request.time > resource.data.expiraEn && codigoNuevoValido(request.resource.data))
+        // El termo escribe el código.
+        || reclamoValido(resource.data, request.resource.data)
+      );
+      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+    }
+
+    match /canales/{canalId} {
+      allow get: if request.auth != null
+        && (request.auth.uid == resource.data.uid || request.auth.uid == resource.data.termoUid);
+      allow list: if false;
+      allow create, update: if request.auth != null && canalValido(canalId, request.resource.data);
+      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+
+      // Mensajes entre la app y el termo. Cada lado escribe solo con su
+      // nombre, lee los del otro y los borra al procesarlos.
+      match /mensajes/{mensajeId} {
+        allow read, delete: if esParteDelCanal(canalId);
+        allow create: if esParteDelCanal(canalId) && mensajeValido(canalId, request.resource.data);
+        allow update: if false;
+      }
+
+      match /ritmo/{doc} {
+        allow read: if esParteDelCanal(canalId);
+        allow create, update: if doc == 'actual' && esDuenoDelCanal(canalId) && ritmoValido(request.resource.data);
+        allow delete: if esDuenoDelCanal(canalId);
+      }
+
+      // Las escribe la app; quien envía el aviso las lee y borra las que ya no sirven.
+      match /dispositivos/{dispositivoId} {
+        allow read, delete: if esParteDelCanal(canalId);
+        allow create, update: if esDuenoDelCanal(canalId)
+          && dispositivoId.matches('^[0-9a-f]{32}$')
+          && dispositivoValido(request.resource.data);
+      }
+    }
+  }
+}

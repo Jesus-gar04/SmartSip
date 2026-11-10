@@ -1,0 +1,822 @@
+/* ═══ Simulador, versión cuidada ═════════════════════════════════════════════
+ * Escenario con los dos mundos (papel arriba, agua abajo), consola con
+ * círculos de función y lecturas en vivo, botones con resorte y un iPhone
+ * con proporciones reales. Todo con los tokens del manual.
+ * Se carga después de estilos.css y lo refina.
+ * ═════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --borde: color-mix(in srgb, var(--tinta) 22%, transparent);
+  --relleno-suave: color-mix(in srgb, var(--tinta) 6%, transparent);
+  --vidrio: #1a1511;
+}
+
+body {
+  font-family: var(--fuente-sans);
+}
+
+/* ─── Cabecera ─── */
+
+.cabecera {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--e3) var(--e4);
+  padding: var(--e4) var(--margen);
+}
+
+.marca {
+  margin: 0;
+  gap: var(--e3);
+  align-items: center;
+}
+
+.reloj {
+  display: grid;
+  order: 3;
+  grid-column: 1 / -1;
+  width: auto;
+  gap: 2px;
+}
+
+.reloj-hora {
+  color: var(--tinta);
+  font-family: var(--fuente-display);
+  font-size: var(--t-titulo);
+  line-height: var(--l-titulo);
+  font-weight: 800;
+  letter-spacing: var(--k-titulo);
+}
+
+.reloj-fecha {
+  color: var(--texto-suave);
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+}
+
+.reloj-fecha strong {
+  color: var(--agua-texto);
+}
+
+.cabecera-sello {
+  order: 4;
+  justify-self: start;
+}
+
+/* En el celular, el selector de datos va en su propia fila. */
+.cabecera > .segmentado {
+  order: 5;
+  grid-column: 1 / -1;
+}
+
+/* ─── Botones ─── */
+
+.boton {
+  gap: var(--e2);
+  min-height: 48px;
+  padding: 0 var(--e5);
+  border: 1.5px solid var(--tinta);
+  border-radius: var(--radio-boton);
+  font-family: var(--fuente-display);
+  font-size: var(--t-cuerpo);
+  font-weight: var(--peso-negrita);
+  letter-spacing: -0.005em;
+  transition:
+    background-color var(--dur-micro) var(--curva),
+    color var(--dur-micro) var(--curva),
+    border-color var(--dur-micro) var(--curva),
+    opacity var(--dur-micro) var(--curva);
+}
+
+.boton:hover:not(:disabled) {
+  background: var(--relleno-suave);
+}
+
+/* El hundido lo hace el resorte de Framer Motion. */
+.boton:active:not(:disabled) {
+  transform: none;
+}
+
+.boton-icono {
+  display: inline-flex;
+}
+
+.boton-icono svg {
+  width: 20px;
+  height: 20px;
+}
+
+.boton-principal {
+  min-height: 56px;
+  border-color: var(--agua);
+  background: var(--agua);
+  color: var(--sobre-agua);
+  font-size: var(--t-funcion);
+}
+
+.boton-principal:hover:not(:disabled) {
+  border-color: var(--agua-honda);
+  background: var(--agua-honda);
+}
+
+.boton-activo,
+.boton-activo:hover:not(:disabled) {
+  border-color: var(--tinta);
+  background: var(--tinta);
+  color: var(--papel);
+}
+
+.boton:disabled {
+  opacity: 0.38;
+}
+
+/* ─── Segmentado: la marca de la opción elegida se desliza ─── */
+
+.segmentado {
+  position: relative;
+  gap: 2px;
+  padding: 4px;
+  border: 0;
+  border-radius: var(--radio-boton);
+  background: var(--relleno-suave);
+}
+
+.segmentado-opcion {
+  position: relative;
+  min-height: 40px;
+  border-radius: 10px;
+  color: var(--texto-suave);
+  font-family: var(--fuente-sans);
+  font-weight: var(--peso-medio);
+}
+
+.segmentado-opcion + .segmentado-opcion {
+  border-left: 0;
+}
+
+.segmentado-opcion[aria-checked='true'] {
+  background: transparent;
+  color: var(--tinta);
+  font-family: var(--fuente-sans);
+}
+
+.segmentado-marca {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  background: var(--superficie);
+  outline: var(--linea-fina) solid var(--linea);
+}
+
+.segmentado-texto {
+  position: relative;
+}
+
+/* ─── Deslizador: la parte recorrida es agua (corte neto, sin degradado) ─── */
+
+.deslizador input::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(to right, var(--agua) var(--relleno), var(--borde) var(--relleno));
+}
+
+.deslizador input::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--borde);
+}
+
+.deslizador input::-moz-range-progress {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--agua);
+}
+
+.deslizador input::-webkit-slider-thumb {
+  width: 24px;
+  height: 24px;
+  margin-top: -10px;
+  border: 2px solid var(--agua);
+  border-radius: 50%;
+  background: var(--superficie);
+}
+
+.deslizador input::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--agua);
+  border-radius: 50%;
+  background: var(--superficie);
+}
+
+.deslizador-cabecera output {
+  font-family: var(--fuente-display);
+  font-weight: var(--peso-negrita);
+}
+
+/* ─── Escenario del termo ─── */
+
+.escenario-termo {
+  position: relative;
+  height: 480px;
+  margin-bottom: var(--e4);
+  overflow: hidden;
+  border: var(--linea-fina) solid var(--linea);
+  border-radius: var(--radio-foto);
+  background: var(--papel);
+  isolation: isolate;
+}
+
+.escenario-termo .visor {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  margin: 0;
+}
+
+.escenario-termo .visor-lienzo {
+  height: calc(100% - 40px);
+}
+
+.escenario-termo .visor-ayuda {
+  position: absolute;
+  right: 0;
+  bottom: var(--e3);
+  left: 0;
+  margin: 0;
+  color: var(--sobre-agua);
+}
+
+.agua {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 1;
+  height: calc(16% + var(--nivel) * 38%);
+  transition: height var(--dur-sorbo) var(--curva);
+}
+
+.agua-cuerpo {
+  position: absolute;
+  inset: 0;
+  background: var(--agua);
+}
+
+.ola {
+  position: absolute;
+  bottom: calc(100% - 2px);
+  left: 0;
+  width: 200%;
+  height: 34px;
+  animation: ola var(--dur-ciclo-ola) linear infinite;
+}
+
+.ola-atras {
+  bottom: calc(100% + 4px);
+  fill: var(--bruma);
+  animation-duration: calc(var(--dur-ciclo-ola) * 1.6);
+  animation-direction: reverse;
+}
+
+.ola-frente {
+  fill: var(--agua);
+}
+
+.agua-quieta .ola {
+  animation: none;
+}
+
+@keyframes ola {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.burbuja {
+  position: absolute;
+  bottom: var(--e10);
+  border: var(--trazo) solid var(--sobre-agua);
+  border-radius: 50%;
+}
+
+/* ─── Pantalla del termo ampliada ─── */
+
+.pantalla-ampliada {
+  position: absolute;
+  right: var(--e4);
+  bottom: var(--e10);
+  z-index: 3;
+  display: grid;
+  gap: var(--e1);
+  margin: 0;
+}
+
+/* El rótulo va dentro del marco oscuro: se lee sobre papel y sobre agua. */
+.pantalla-ampliada {
+  gap: 0;
+  padding: var(--e2) var(--e2) var(--e2);
+  border-radius: calc(var(--radio-boton) + 6px);
+  background: var(--vidrio);
+}
+
+.pantalla-titulo {
+  padding: 0 var(--e2) var(--e1);
+  color: #cfc6bc;
+  font-family: var(--f-sello);
+  font-size: 10px;
+  line-height: 14px;
+  font-weight: var(--p-sello);
+  letter-spacing: var(--k-sello);
+  text-transform: uppercase;
+}
+
+.pantalla-vidrio {
+  display: flex;
+  align-items: center;
+  gap: var(--e4);
+  min-width: 172px;
+  min-height: 72px;
+  padding: var(--e3) var(--e4);
+  border: 3px solid color-mix(in srgb, #c9b9a6 70%, transparent);
+  border-radius: var(--radio-boton);
+  background: var(--vidrio);
+  color: #f2ebe4;
+}
+
+.pantalla-ampliada[data-encendida='false'] .pantalla-vidrio {
+  background: #0e0b09;
+}
+
+.pantalla-ampliada[data-brillo='bajo'] .pantalla-vidrio > * {
+  opacity: 0.55;
+}
+
+.pantalla-ampliada[data-brillo='medio'] .pantalla-vidrio > * {
+  opacity: 0.85;
+}
+
+.pantalla-temp {
+  font-family: var(--fuente-display);
+  font-size: 44px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.pantalla-unidad {
+  margin-left: 2px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.pantalla-lado {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+  margin-left: auto;
+  font-size: 12px;
+  line-height: 14px;
+}
+
+.pantalla-bateria {
+  position: relative;
+  width: 32px;
+  height: 14px;
+  padding: 2px;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+}
+
+.pantalla-bateria::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  right: -4px;
+  width: 2px;
+  height: 5px;
+  background: currentColor;
+}
+
+.pantalla-bateria span {
+  display: block;
+  height: 100%;
+  border-radius: 1px;
+  background: currentColor;
+}
+
+.pantalla-bt svg {
+  width: 16px;
+  height: 16px;
+}
+
+.pantalla-bt-sin {
+  opacity: 0.25;
+}
+
+/* En el celular: termo a la izquierda, pantalla compacta a la derecha. */
+@media (max-width: 1023px) {
+  .escenario-termo .visor-lienzo {
+    width: 62%;
+  }
+
+  .pantalla-ampliada {
+    right: var(--e3);
+  }
+
+  .pantalla-vidrio {
+    min-width: 0;
+    gap: var(--e3);
+    padding: var(--e2) var(--e3);
+  }
+
+  .pantalla-temp {
+    font-size: 34px;
+  }
+}
+
+/* ─── Consola ─── */
+
+.consola {
+  display: grid;
+  gap: var(--e4);
+}
+
+.consola-tarjeta {
+  padding: var(--e5);
+  border: var(--linea-fina) solid var(--linea);
+  border-radius: var(--radio-tarjeta);
+  background: var(--superficie);
+  animation: entrar var(--dur-transicion) var(--curva) both;
+}
+
+.consola-tarjeta:nth-child(2) {
+  animation-delay: 40ms;
+}
+.consola-tarjeta:nth-child(3) {
+  animation-delay: 80ms;
+}
+.consola-tarjeta:nth-child(4) {
+  animation-delay: 120ms;
+}
+.consola-tarjeta:nth-child(5) {
+  animation-delay: 160ms;
+}
+.consola-tarjeta:nth-child(6) {
+  animation-delay: 200ms;
+}
+
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.consola-cabecera {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: var(--e3);
+  align-items: start;
+}
+
+.funcion-circulo {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: var(--trazo) solid var(--tinta);
+  border-radius: 50%;
+  color: var(--tinta);
+}
+
+.funcion-circulo svg {
+  width: 22px;
+  height: 22px;
+}
+
+.funcion-nombre {
+  font-family: var(--f-funcion);
+  font-size: var(--t-funcion);
+  line-height: var(--l-funcion);
+  font-weight: var(--p-funcion);
+}
+
+.consola-explica {
+  margin-top: 2px;
+  color: var(--texto-suave);
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+}
+
+.consola-lectura {
+  display: grid;
+  justify-items: end;
+  max-width: 140px;
+  text-align: right;
+}
+
+.lectura-grande {
+  font-family: var(--fuente-display);
+  font-size: var(--t-titulo);
+  line-height: var(--l-titulo);
+  font-weight: 800;
+  letter-spacing: var(--k-titulo);
+  white-space: nowrap;
+}
+
+.lectura-unidad {
+  color: var(--texto-suave);
+  font-family: var(--fuente-sans);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.lectura-estado {
+  font-family: var(--fuente-display);
+  font-size: var(--t-funcion);
+  line-height: var(--l-funcion);
+  font-weight: var(--peso-negrita);
+}
+
+.consola-cuerpo {
+  display: grid;
+  gap: var(--e3);
+  margin-top: var(--e4);
+}
+
+.consola-nota {
+  color: var(--texto-suave);
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+}
+
+.consola-nota-aviso {
+  color: var(--agua-honda);
+  font-weight: var(--peso-medio);
+}
+
+.consola-dato {
+  display: grid;
+  gap: 2px;
+}
+
+.consola-fuente {
+  color: var(--texto-suave);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="dia"]) .consola-nota-aviso {
+    color: var(--agua-texto);
+  }
+}
+:root[data-tema="noche"] .consola-nota-aviso {
+  color: var(--agua-texto);
+}
+
+/* ─── Línea de mensajes ─── */
+
+.linea {
+  padding: var(--e4);
+  border: var(--linea-fina) solid var(--linea);
+  border-radius: var(--radio-tarjeta);
+  background: var(--superficie);
+}
+
+.linea-cabecera {
+  color: var(--tinta);
+  font-family: var(--fuente-display);
+  font-weight: var(--peso-negrita);
+}
+
+.pulso {
+  background: var(--agua);
+}
+
+/* ─── Escritorio ─── */
+
+@media (min-width: 1024px) {
+  .escenario-termo {
+    height: 600px;
+  }
+
+  /* El termo a la izquierda; su pantalla ampliada, abajo a la derecha. */
+  .escenario-termo .visor-lienzo {
+    width: 68%;
+  }
+
+  .escenario-termo .visor-ayuda {
+    right: auto;
+    width: 68%;
+  }
+
+  .cabecera {
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+  }
+
+  .reloj {
+    order: 0;
+    grid-column: auto;
+    justify-self: center;
+    text-align: center;
+  }
+
+  .cabecera-sello {
+    order: 0;
+  }
+
+  .cabecera > .segmentado {
+    order: 0;
+    grid-column: auto;
+  }
+
+  /* iPhone con proporciones reales y botones laterales. */
+  .telefono {
+    position: relative;
+    padding: 12px;
+    border-radius: 56px;
+  }
+
+  .telefono::before,
+  .telefono::after {
+    content: '';
+    position: absolute;
+    width: 4px;
+    border-radius: 2px;
+    background: var(--tinta-fija);
+  }
+
+  .telefono::before {
+    top: 140px;
+    left: -4px;
+    height: 96px;
+  }
+
+  .telefono::after {
+    top: 180px;
+    right: -4px;
+    height: 72px;
+  }
+
+  .telefono .app-pantalla {
+    border-radius: 44px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .col-termo {
+    grid-template-columns: minmax(320px, 1fr) minmax(340px, 400px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .consola-tarjeta {
+    animation: none;
+  }
+}
+
+/* Tapa de rosca en la ilustración 2.5D: sube con la misma curva que el 3D. */
+.termo-2d-tapa {
+  transition: transform var(--dur-sorbo) cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .termo-2d-tapa {
+    transition: none;
+  }
+}
+
+/* ─── El termo siempre a la vista ─────────────────────────────────────────
+ * El escenario queda fijo mientras la consola se desplaza: se toca un
+ * control y se ve su efecto sin volver a subir.
+ */
+.escenario-termo {
+  position: sticky;
+  z-index: 4;
+}
+
+/* Celular: fijo bajo las pestañas, compacto. */
+@media (max-width: 1023px) {
+  .escenario-termo {
+    top: 65px;
+    height: clamp(260px, 42svh, 380px);
+  }
+
+  .escenario-termo .visor-lienzo {
+    height: calc(100% - 32px);
+  }
+}
+
+/* Escritorio estrecho: el termo arriba, fijo; la consola pasa por debajo. */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .escenario-termo {
+    top: var(--e4);
+    height: 440px;
+  }
+}
+
+/* Escritorio ancho: termo a la izquierda, fijo; consola a su lado. */
+@media (min-width: 1280px) {
+  .escenario-termo {
+    top: var(--e6);
+    height: min(600px, calc(100svh - 48px));
+  }
+}
+
+/* ─── Emparejar con la app ─── */
+
+.emparejar-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--e3);
+}
+
+.emparejar-form .consola-nota {
+  grid-column: 1 / -1;
+}
+
+.codigo-entrada {
+  min-width: 0;
+  min-height: 48px;
+  padding: 0 var(--e4);
+  border: 1.5px solid var(--borde);
+  border-radius: var(--radio-boton);
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: var(--fuente-display);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.codigo-entrada:focus-visible {
+  border-color: var(--agua);
+  outline: 2px solid var(--agua);
+  outline-offset: 1px;
+}
+
+/* ─── Avisos al celular ─── */
+
+.avisos-botones {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--e2);
+}
+
+/* ─── Actualización de firmware en la pantalla del termo (A4) ─── */
+
+.pantalla-act {
+  display: grid;
+  gap: 4px;
+  width: 96px;
+}
+
+.pantalla-act-texto {
+  font-family: var(--fuente-display);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pantalla-act-barra {
+  height: 10px;
+  padding: 2px;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+}
+
+.pantalla-act-barra > span {
+  display: block;
+  height: 100%;
+  background: currentColor;
+  transition: width var(--dur-micro) linear;
+}
+
+.pantalla-act-pct {
+  font-size: 12px;
+  line-height: 14px;
+}
+
+.firmware-barra {
+  height: 8px;
+  overflow: hidden;
+  border-radius: var(--radio-sello);
+  background: color-mix(in srgb, var(--agua) 14%, transparent);
+}
+
+.firmware-barra > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--agua);
+  transition: width var(--dur-micro) linear;
+}

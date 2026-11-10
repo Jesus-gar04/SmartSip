@@ -1,0 +1,16 @@
+{
+  "name": "smartsip-firebase",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "firebase": "13.2.0",
+    "smartsip-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "6.0.0"
+  }
+}

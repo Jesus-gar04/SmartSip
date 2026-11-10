@@ -1,0 +1,341 @@
+/* ═══ La app (PWA): portada e invitación a instalar ══════════════════════════
+ * Papel arriba, agua abajo, separados por la ola (manual, "La app").
+ * ═════════════════════════════════════════════════════════════════════════ */
+
+.inicio {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+  background: var(--papel);
+}
+
+.inicio-cabecera {
+  padding: calc(var(--e4) + env(safe-area-inset-top)) var(--margen) 0;
+}
+
+.inicio-papel {
+  display: grid;
+  align-content: start;
+  gap: var(--e3);
+  flex: 0 0 auto;
+  padding: var(--e10) var(--margen) var(--e12);
+}
+
+.pregunta {
+  max-width: 11ch;
+  margin: 0;
+  color: var(--tinta);
+  font-family: var(--f-pregunta);
+  font-size: clamp(44px, 12vw, var(--t-pregunta));
+  line-height: var(--l-pregunta);
+  font-weight: var(--p-pregunta);
+  letter-spacing: var(--k-pregunta);
+}
+
+.palabra-azul {
+  color: var(--agua-texto);
+}
+
+.inicio-papel .firma {
+  margin-bottom: var(--e6);
+}
+
+/* ─── El agua ─── */
+
+.inicio-agua {
+  position: relative;
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: var(--e4);
+  flex: 1 0 auto;
+  min-height: 30svh;
+  padding: var(--e8) var(--margen) calc(var(--e8) + env(safe-area-inset-bottom));
+  background: var(--agua);
+  color: var(--sobre-agua);
+}
+
+.inicio-agua .ola {
+  position: absolute;
+  bottom: calc(100% - 2px);
+  left: 0;
+  width: 200%;
+  height: 34px;
+  animation: ola var(--dur-ciclo-ola) linear infinite;
+}
+
+.inicio-agua .ola-atras {
+  bottom: calc(100% + 4px);
+  fill: var(--bruma);
+  animation-duration: calc(var(--dur-ciclo-ola) * 1.6);
+  animation-direction: reverse;
+}
+
+.inicio-agua .ola-frente {
+  fill: var(--agua);
+}
+
+.inicio-agua.agua-quieta .ola {
+  animation: none;
+}
+
+.inicio-promesa {
+  max-width: 28ch;
+  font-family: var(--f-funcion);
+  font-size: var(--t-funcion);
+  line-height: var(--l-funcion);
+  font-weight: var(--p-funcion);
+}
+
+/* Botón sobre el agua (manual, Boton): blanco con texto azul hondo. */
+.boton-sobre-agua {
+  border-color: var(--sobre-agua);
+  background: var(--sobre-agua);
+  color: var(--agua-honda);
+  text-decoration: none;
+}
+
+/* Más específico que el hover genérico de .boton: sobre el agua el fondo sigue blanco. */
+.boton.boton-sobre-agua:hover:not(:disabled),
+.boton.boton-sobre-agua:focus-visible {
+  border-color: var(--sobre-agua);
+  background: var(--sobre-agua);
+  color: var(--agua-honda);
+  opacity: 0.9;
+}
+
+.boton.boton-sobre-agua:disabled {
+  opacity: 0.6;
+}
+
+.boton.boton-sobre-agua:focus-visible {
+  outline-color: var(--sobre-agua);
+}
+
+/* ─── Invitación a instalar ─── */
+
+.invitacion {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: var(--e4);
+  max-width: 480px;
+  padding: var(--e5);
+  border: var(--linea-fina) solid var(--linea);
+  border-radius: var(--radio-tarjeta);
+  background: var(--superficie);
+}
+
+.invitacion-icono {
+  border-radius: 14px;
+}
+
+.invitacion-texto {
+  display: grid;
+  gap: var(--e2);
+}
+
+.invitacion-texto h2 {
+  margin: 0;
+  font-family: var(--f-funcion);
+  font-size: var(--t-funcion);
+  line-height: var(--l-funcion);
+  font-weight: var(--p-funcion);
+}
+
+.invitacion-texto p {
+  color: var(--texto-suave);
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+}
+
+.invitacion-pasos {
+  display: grid;
+  gap: var(--e2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+}
+
+.invitacion-pasos li {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+}
+
+.invitacion-paso-icono {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: var(--trazo) solid var(--tinta);
+  border-radius: 50%;
+}
+
+.invitacion-nota {
+  font-weight: var(--peso-medio);
+}
+
+.invitacion-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: var(--e4);
+}
+
+.invitacion-acciones .boton-principal {
+  width: auto;
+  flex: 1 1 auto;
+}
+
+.enlace {
+  padding: var(--e2) 0;
+  border: 0;
+  background: none;
+  color: var(--texto-suave);
+  font: inherit;
+  font-size: var(--t-etiqueta);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* ─── Primer uso ─── */
+
+.titulo-pantalla {
+  margin: 0;
+  font-family: var(--f-titulo);
+  font-size: var(--t-titulo);
+  line-height: var(--l-titulo);
+  font-weight: var(--p-titulo);
+  letter-spacing: var(--k-titulo);
+}
+
+.texto-suave {
+  color: var(--texto-suave);
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+}
+
+.formulario {
+  display: grid;
+  gap: var(--e5);
+  max-width: 420px;
+  margin-top: var(--e4);
+}
+
+.campo {
+  display: grid;
+  gap: var(--e2);
+}
+
+.campo label,
+.campo-etiqueta {
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+  font-weight: var(--peso-medio);
+}
+
+.campo input:not([type='range']) {
+  min-height: 52px;
+  padding: 0 var(--e4);
+  border: 1.5px solid var(--borde);
+  border-radius: var(--radio-boton);
+  background: var(--superficie);
+  color: var(--tinta);
+  font: inherit;
+  font-size: var(--t-cuerpo);
+  transition: border-color var(--dur-micro) var(--curva);
+}
+
+.campo input:not([type='range']):focus-visible {
+  border-color: var(--agua);
+  outline: 2px solid var(--agua);
+  outline-offset: 1px;
+}
+
+.aviso-app {
+  padding: var(--e3) var(--e4);
+  border: var(--linea-fina) solid var(--tinta);
+  border-radius: var(--radio-boton);
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+}
+
+.acciones-agua {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e5);
+}
+
+.enlace-sobre-agua {
+  color: var(--sobre-agua);
+}
+
+.sello-sobre-agua {
+  color: var(--sobre-agua);
+  opacity: 0.85;
+}
+
+.meta-previa,
+.codigo-bloque {
+  display: grid;
+  gap: var(--e1);
+}
+
+.meta-cifra,
+.codigo-cifra {
+  font-family: var(--f-cifra);
+  font-size: var(--t-cifra);
+  line-height: var(--l-cifra);
+  font-weight: var(--p-cifra);
+  letter-spacing: var(--k-cifra);
+}
+
+.codigo-cifra {
+  letter-spacing: 0.04em;
+}
+
+.codigo-vencido {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
+.meta-explica {
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+  opacity: 0.9;
+}
+
+.pasos {
+  display: grid;
+  gap: var(--e3);
+  max-width: 420px;
+  margin: var(--e2) 0 0;
+  padding-left: var(--e5);
+  color: var(--texto-suave);
+}
+
+.pasos li::marker {
+  color: var(--agua-texto);
+  font-family: var(--fuente-display);
+  font-weight: var(--peso-negrita);
+}
+
+/* Los sellos ocupan solo su texto, no la fila entera. */
+.inicio-papel > .sello {
+  justify-self: start;
+}
+
+.saludo {
+  margin: 0;
+  color: var(--texto-suave);
+  font-family: var(--f-funcion);
+  font-size: var(--t-funcion);
+  line-height: var(--l-funcion);
+  font-weight: var(--p-funcion);
+}

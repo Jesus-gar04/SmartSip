@@ -1,0 +1,45 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "smartsip-web",
+        "dev"
+      ],
+      "port": 5173
+    },
+    {
+      "name": "web-produccion",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "smartsip-web",
+        "preview"
+      ],
+      "port": 4173
+    },
+    {
+      "name": "web-emulador",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "smartsip-web",
+        "dev:emulador"
+      ],
+      "port": 5173
+    },
+    {
+      "name": "web-emulador-produccion",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "smartsip-web",
+        "preview:emulador"
+      ],
+      "port": 4173
+    }
+  ]
+}

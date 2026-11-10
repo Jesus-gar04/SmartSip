@@ -1,0 +1,769 @@
+/*
+ * Estilos de SmartSip. Todo valor sale de los tokens (variables en tema.ts).
+ * Primero el celular; el escritorio se suma desde 1024 px.
+ * Sin sombras, sin degradados, sin píldoras.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --borde: color-mix(in srgb, var(--tinta) 30%, transparent);
+  --tinta-fija: #241d18;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: var(--fuente-sans);
+  font-size: var(--t-cuerpo);
+  line-height: var(--l-cuerpo);
+  -webkit-font-smoothing: antialiased;
+}
+
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+.cifras {
+  font-variant-numeric: tabular-nums;
+}
+
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+:focus-visible {
+  outline: 2px solid var(--tinta);
+  outline-offset: 2px;
+}
+
+/* ─── Página ─────────────────────────────────────────────────────────────── */
+
+.pagina {
+  min-height: 100dvh;
+  padding-bottom: calc(52px + env(safe-area-inset-bottom));
+}
+
+.cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e2) var(--e4);
+  padding: var(--e4) var(--margen) var(--e3);
+  border-bottom: var(--linea-fina) solid var(--linea);
+}
+
+.marca {
+  display: flex;
+  align-items: baseline;
+  gap: var(--e2);
+  margin-right: auto;
+}
+
+.marca-nombre {
+  font-weight: var(--peso-negrita);
+  font-size: var(--t-funcion);
+  line-height: var(--l-funcion);
+}
+
+.marca-sub,
+.reloj {
+  color: var(--texto-suave);
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+  letter-spacing: var(--k-etiqueta);
+}
+
+.reloj {
+  order: 3;
+  width: 100%;
+}
+
+.reloj-velocidad {
+  color: var(--tinta);
+}
+
+.aviso {
+  margin: var(--e3) var(--margen) 0;
+  padding: var(--e3) var(--e4);
+  border: var(--linea-fina) solid var(--linea);
+  border-radius: var(--radio-tarjeta);
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+}
+
+.pestanas {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: var(--e3) var(--margen);
+  background: var(--papel);
+  border-bottom: var(--linea-fina) solid var(--linea);
+}
+
+.pestanas .segmentado {
+  width: 100%;
+}
+
+.escenario {
+  padding: var(--e4) var(--margen) var(--e6);
+}
+
+/* En el celular se ve una columna a la vez. */
+.escenario[data-pestana='termo'] .col-app,
+.escenario[data-pestana='app'] .col-termo,
+.escenario .linea {
+  display: none;
+}
+
+/* ─── Controles ──────────────────────────────────────────────────────────── */
+
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 var(--e4);
+  border: var(--linea-fina) solid var(--borde);
+  border-radius: var(--radio-boton);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-micro) var(--curva),
+    opacity var(--dur-micro) var(--curva),
+    transform var(--dur-micro) var(--curva);
+}
+
+.boton:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.boton-principal {
+  width: 100%;
+  border-color: var(--agua);
+  background: var(--agua);
+  color: var(--sobre-agua);
+  font-weight: var(--peso-negrita);
+}
+
+.boton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.segmentado {
+  display: inline-flex;
+  border: var(--linea-fina) solid var(--borde);
+  border-radius: var(--radio-boton);
+  overflow: hidden;
+}
+
+.segmentado-opcion {
+  flex: 1 1 0;
+  min-height: 40px;
+  padding: 0 var(--e3);
+  border: 0;
+  background: transparent;
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-micro) var(--curva),
+    color var(--dur-micro) var(--curva);
+}
+
+.segmentado-opcion + .segmentado-opcion {
+  border-left: var(--linea-fina) solid var(--borde);
+}
+
+.segmentado-opcion[aria-checked='true'] {
+  background: var(--tinta);
+  color: var(--papel);
+}
+
+.segmentado-opcion:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.deslizador-cabecera {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+}
+
+.deslizador input {
+  width: 100%;
+  height: 32px;
+  margin: 0;
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.deslizador input::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--borde);
+}
+
+.deslizador input::-moz-range-track {
+  height: 2px;
+  background: var(--borde);
+}
+
+.deslizador input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: -9px;
+  border-radius: var(--radio-boton);
+  background: var(--tinta);
+}
+
+.deslizador input::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: var(--radio-boton);
+  background: var(--tinta);
+}
+
+.fila {
+  display: flex;
+  gap: var(--e2);
+}
+
+.fila > * {
+  flex: 1 1 0;
+}
+
+.nota {
+  color: var(--texto-suave);
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+}
+
+/* ─── Termo ──────────────────────────────────────────────────────────────── */
+
+.visor {
+  margin: 0 0 var(--e4);
+}
+
+.visor-lienzo {
+  height: 420px;
+  border-radius: var(--radio-tarjeta);
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.visor-lienzo:active {
+  cursor: grabbing;
+}
+
+.termo-2d {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.termo-2d-cuerpo,
+.termo-2d-agua {
+  transition: opacity var(--dur-transicion) var(--curva);
+}
+
+.visor-ayuda {
+  min-height: var(--l-etiqueta);
+  margin-top: var(--e2);
+  color: var(--texto-suave);
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+  text-align: center;
+}
+
+/* ─── Panel ──────────────────────────────────────────────────────────────── */
+
+.panel {
+  display: grid;
+  gap: var(--e4);
+}
+
+.grupo {
+  display: grid;
+  gap: var(--e3);
+  min-width: 0;
+  margin: 0;
+  padding: var(--e4);
+  border: var(--linea-fina) solid var(--linea);
+  border-radius: var(--radio-tarjeta);
+}
+
+.grupo-titulo {
+  padding: 0 var(--e1);
+  color: var(--texto-suave);
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+  letter-spacing: var(--k-etiqueta);
+}
+
+.grupo .segmentado {
+  width: 100%;
+}
+
+/* ─── Línea de mensajes ──────────────────────────────────────────────────── */
+
+.linea-pista {
+  position: relative;
+  height: var(--linea-fina);
+  background: var(--linea);
+}
+
+.pulso {
+  position: absolute;
+  top: -3px;
+  width: 7px;
+  height: 7px;
+  margin-left: -3.5px;
+  border-radius: 50%;
+  background: var(--agua);
+}
+
+.pulso-tenue {
+  opacity: 0.5;
+}
+
+.linea {
+  min-width: 0;
+}
+
+.linea-cabecera {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--e3);
+  color: var(--texto-suave);
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+}
+
+.linea-pista-estado {
+  margin-bottom: var(--e4);
+}
+
+.linea-estado {
+  position: absolute;
+  top: var(--e1);
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--texto-suave);
+  font-size: 10px;
+  line-height: 12px;
+}
+
+.linea-lista {
+  display: grid;
+  gap: var(--e3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.linea-mensaje {
+  display: grid;
+  gap: var(--e1);
+}
+
+.linea-texto {
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+  overflow-wrap: anywhere;
+}
+
+.linea-appATermo .linea-texto {
+  text-align: right;
+}
+
+.linea-hora {
+  color: var(--texto-suave);
+  font-size: 10px;
+  line-height: 12px;
+}
+
+.linea-appATermo .linea-hora {
+  text-align: right;
+}
+
+.franja {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 3;
+  padding: 0 var(--margen) env(safe-area-inset-bottom);
+  background: var(--papel);
+}
+
+.franja .linea-pista {
+  margin: 0 calc(-1 * var(--margen));
+}
+
+.franja-texto {
+  display: block;
+  overflow: hidden;
+  padding: var(--e3) 0;
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* ─── Teléfono y app ─────────────────────────────────────────────────────── */
+
+.app-pantalla {
+  display: grid;
+  align-content: start;
+  gap: var(--e4);
+}
+
+.app-barra {
+  display: none;
+}
+
+.app-cabecera h2 {
+  font-size: var(--t-titulo);
+  line-height: var(--l-titulo);
+  letter-spacing: var(--k-titulo);
+}
+
+.app-conexion {
+  color: var(--texto-suave);
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+}
+
+.app-litros {
+  padding: var(--e4) 0;
+}
+
+.litros {
+  font-size: var(--t-cifra);
+  line-height: var(--l-cifra);
+  letter-spacing: var(--k-cifra);
+  font-weight: var(--peso-negrita);
+}
+
+.litros-unidad {
+  margin-left: var(--e2);
+  font-size: var(--t-unidad-cifra);
+  font-weight: var(--peso-regular);
+  letter-spacing: 0;
+}
+
+.app-detalle {
+  color: var(--texto-suave);
+}
+
+.app-vacio {
+  display: grid;
+  justify-items: center;
+  gap: var(--e4);
+  padding: var(--e8) 0;
+  color: var(--texto-suave);
+}
+
+.silueta {
+  width: 56px;
+  height: 140px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+}
+
+.tarjeta {
+  display: grid;
+  gap: var(--e2);
+  padding: var(--e4);
+  border-radius: var(--radio-tarjeta);
+  background: var(--superficie);
+  color: var(--tinta);
+}
+
+.tarjeta h3 {
+  font-size: var(--t-cuerpo);
+  line-height: var(--l-cuerpo);
+  font-weight: var(--peso-negrita);
+}
+
+.tarjeta .nota {
+  color: inherit;
+  opacity: 0.8;
+}
+
+.tarjeta .boton:not(.boton-principal) {
+  border-color: color-mix(in srgb, currentColor 40%, transparent);
+}
+
+.app-pie {
+  margin-top: var(--e4);
+  color: var(--texto-suave);
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+}
+
+/* ─── Escritorio ─────────────────────────────────────────────────────────── */
+
+@media (min-width: 1024px) {
+  .pagina {
+    padding-bottom: 0;
+  }
+
+  .reloj {
+    order: 0;
+    width: auto;
+  }
+
+  .pestanas,
+  .franja {
+    display: none;
+  }
+
+  .escenario {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 200px 340px;
+    gap: var(--e8);
+    align-items: start;
+    padding-top: var(--e6);
+  }
+
+  .escenario[data-pestana] .col-termo,
+  .escenario[data-pestana] .col-app,
+  .escenario .linea {
+    display: block;
+  }
+
+  .visor-lienzo {
+    height: 520px;
+  }
+
+  .linea {
+    position: sticky;
+    top: var(--e6);
+  }
+
+  .col-app {
+    position: sticky;
+    top: var(--e6);
+  }
+
+  /* El iPhone dibujado: solo en escritorio, donde no estás en un teléfono. */
+  .telefono {
+    width: 340px;
+    height: 700px;
+    padding: var(--e3);
+    border-radius: 52px;
+    background: var(--tinta-fija);
+    outline: var(--linea-fina) solid var(--linea);
+  }
+
+  .telefono .app-pantalla {
+    height: 100%;
+    overflow-y: auto;
+    padding: var(--e4) var(--e6) var(--e6);
+    border-radius: 42px;
+    background: var(--papel);
+    scrollbar-width: none;
+  }
+
+  .app-barra {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 calc(-1 * var(--e2)) var(--e2);
+    font-size: var(--t-etiqueta);
+    line-height: var(--l-etiqueta);
+    font-weight: var(--peso-negrita);
+  }
+
+  .app-barra-camara {
+    width: 96px;
+    height: 28px;
+    border-radius: 14px;
+    background: var(--tinta-fija);
+  }
+}
+
+@media (min-width: 1280px) {
+  .col-termo {
+    display: grid !important;
+    grid-template-columns: minmax(260px, 1fr) minmax(300px, 380px);
+    gap: var(--e6);
+    align-items: start;
+  }
+
+  .col-termo .visor {
+    position: sticky;
+    top: var(--e6);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: var(--dur-micro) !important;
+  }
+}
+
+/* ─── Clima ──────────────────────────────────────────────────────────────── */
+
+.clima {
+  display: grid;
+  gap: var(--e2);
+}
+
+.clima-lugar {
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+}
+
+.clima-ahora {
+  font-size: var(--t-funcion);
+  line-height: var(--l-funcion);
+  font-weight: var(--peso-negrita);
+}
+
+.clima-maxima {
+  font-size: var(--t-etiqueta);
+  font-weight: var(--peso-regular);
+  color: var(--texto-suave);
+}
+
+/* ─── Marca (manual de marca) ────────────────────────────────────────────── */
+
+h1,
+h2,
+h3,
+.boton,
+.segmentado-opcion[aria-checked='true'],
+.marca-nombre {
+  font-family: var(--fuente-display);
+}
+
+.boton {
+  font-weight: var(--peso-negrita);
+  border-color: var(--tinta);
+}
+
+.boton-principal {
+  border-color: var(--agua);
+}
+
+.boton-principal:active:not(:disabled) {
+  background: var(--agua-honda);
+  border-color: var(--agua-honda);
+}
+
+.logo {
+  display: block;
+  height: 28px;
+  width: auto;
+}
+
+.logo-noche {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="dia"]) .logo-dia {
+    display: none;
+  }
+  :root:not([data-tema="dia"]) .logo-noche {
+    display: block;
+  }
+}
+:root[data-tema="noche"] .logo-dia {
+  display: none;
+}
+:root[data-tema="noche"] .logo-noche {
+  display: block;
+}
+
+/* Sello: mayúsculas espaciadas; en píldora marca un estado (máximo uno por pantalla). */
+.sello {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e1);
+  padding: var(--e1) var(--e3);
+  border-radius: var(--radio-sello);
+  background: var(--sello);
+  color: var(--sello-texto);
+  font-family: var(--f-sello);
+  font-size: var(--t-sello);
+  line-height: var(--l-sello);
+  font-weight: var(--p-sello);
+  letter-spacing: var(--k-sello);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sello-suelto {
+  background: none;
+  padding: 0;
+  color: var(--texto-suave);
+}
+
+.firma {
+  color: var(--cacao);
+  font-family: var(--f-firma);
+  font-size: var(--t-firma);
+  line-height: var(--l-firma);
+  font-weight: var(--p-firma);
+  transform: rotate(-2deg);
+  transform-origin: left center;
+}
+
+.litros {
+  font-family: var(--f-cifra);
+  font-weight: var(--p-cifra);
+}
+
+.litros-unidad {
+  font-family: var(--f-unidad-cifra);
+  font-weight: var(--p-unidad-cifra);
+}
+
+fieldset.panel {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+fieldset.panel:disabled {
+  opacity: 0.55;
+}

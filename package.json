@@ -1,0 +1,31 @@
+{
+  "name": "smartsip",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.5.1",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
+    "test:firebase": "firebase emulators:exec --project demo-smartsip --only auth,firestore \"vitest run --config packages/firebase/vitest.config.ts\"",
+    "typecheck": "tsc -p packages/tokens && tsc -p packages/core && tsc -p packages/core/tsconfig.test.json && tsc -p packages/firebase && tsc -p apps/web && tsc -p apps/web/api && tsc -p apps/web/sw",
+    "sim": "tsx packages/core/scripts/simular.ts",
+    "emuladores": "firebase emulators:start --project demo-smartsip --only auth,firestore",
+    "firebase:publicar-reglas": "firebase deploy --only firestore:rules,firestore:indexes",
+    "firebase:humo": "tsx packages/firebase/scripts/humo.ts",
+    "firebase:sembrar": "tsx packages/firebase/scripts/sembrar.ts",
+    "firebase:probar-scripts": "firebase emulators:exec --project demo-smartsip --only auth,firestore \"tsx packages/firebase/scripts/humo.ts --emulador && tsx packages/firebase/scripts/sembrar.ts --emulador && tsx packages/firebase/scripts/sembrar.ts --emulador\"",
+    "dev": "pnpm --filter smartsip-web dev",
+    "build": "pnpm --filter smartsip-web build"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "@vitest/coverage-v8": "5.1.0",
+    "firebase-tools": "15.35.0",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vitest": "5.1.0"
+  }
+}

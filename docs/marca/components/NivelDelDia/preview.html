@@ -1,0 +1,32 @@
+<!-- @dsCard group="App" height=470 subtitle="La pantalla es el termo" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;600;700&family=Caveat:wght@700&display=swap">
+<style>
+body{margin:0;background:var(--papel);font-family:var(--font-sans);display:flex;gap:var(--space-6);padding:var(--space-6);justify-content:center}
+.tel{width:210px;height:420px;border-radius:var(--radius-xl);background:var(--papel);position:relative;overflow:hidden;border:2px solid var(--tinta)}
+.top{padding:var(--space-4) var(--space-4) 0}
+.marca{font-family:var(--font-display);font-weight:800;font-size:15px;color:var(--tinta)}
+.q{font-family:var(--font-display);font-weight:800;font-size:27px;line-height:.92;letter-spacing:-.02em;color:var(--tinta);margin-top:var(--space-3)}
+.q span{color:var(--azul-claro)}
+.f{font-family:var(--font-firma);font-weight:700;color:var(--cacao);font-size:15px;margin-top:6px}
+.agua{position:absolute;left:0;right:0;bottom:0}
+.agua svg{display:block;width:100%;height:22px}
+.b{fill:var(--bruma)}.a{fill:var(--azul)}
+.cuerpo{background:var(--azul);height:100%;color:var(--blanco);padding:0 var(--space-4)}
+.cifra{font-family:var(--font-display);font-weight:800;font-size:40px;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.de{font-size:12px;opacity:.9}
+.ok{font-family:var(--font-firma);font-weight:700;font-size:17px;margin-top:var(--space-2)}
+.burb{position:absolute;border:2px solid var(--blanco);border-radius:50%}
+</style></head><body>
+<div class="tel">
+  <div class="top"><div class="marca">SmartSip</div><div class="q">¿Cuánta <span>agua</span> tomaste hoy?</div><div class="f">SmartSip sí lo sabe.</div></div>
+  <div class="agua" style="height:46%"><svg viewBox="0 0 210 22" preserveAspectRatio="none"><path class="b" d="M0 8 C40 0 80 16 120 8 S190 0 210 6 V22 H0Z"/><path class="a" d="M0 14 C45 4 95 22 140 12 S195 6 210 12 V22 H0Z"/></svg>
+    <div class="cuerpo" style="height:calc(100% - 22px)"><div class="cifra">1,2 L</div><div class="de">de 2,4 L · vas bien para esta hora</div></div>
+    <span class="burb" style="width:10px;height:10px;right:40px;bottom:60px"></span><span class="burb" style="width:6px;height:6px;right:62px;bottom:94px"></span>
+  </div>
+</div>
+<div class="tel">
+  <div class="agua" style="height:100%"><svg viewBox="0 0 210 22" preserveAspectRatio="none" style="background:var(--papel)"><path class="b" d="M0 8 C40 0 80 16 120 8 S190 0 210 6 V22 H0Z"/><path class="a" d="M0 14 C45 4 95 22 140 12 S195 6 210 12 V22 H0Z"/></svg>
+    <div class="cuerpo" style="height:calc(100% - 22px);padding-top:150px"><div class="cifra">2,4 L</div><div class="de">de 2,4 L</div><div class="ok">Hidrataste lo de hoy.</div></div>
+  </div>
+</div>
+</body></html>

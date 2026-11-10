@@ -1,0 +1,29 @@
+<!-- @dsCard height=320 -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;600;700&family=Caveat:wght@700&display=swap">
+<style>
+html,body{margin:0}
+body{width:960px;height:320px;background:var(--papel);position:relative;overflow:hidden}
+svg{position:absolute;left:480px;top:0;width:480px;height:320px}
+.azul{fill:var(--azul)}.bruma{fill:var(--bruma)}.tinta{fill:var(--tinta)}.tierra{fill:var(--tierra)}
+.r-xl{rx:var(--radius-xl)}.r-lg{rx:var(--radius-lg)}.pill{rx:16px}
+.ola{fill:none;stroke:var(--papel);stroke-width:var(--trazo);stroke-linecap:round}
+.txt{position:absolute;left:48px;bottom:44px;max-width:440px}
+.name{font-family:var(--font-display);font-weight:800;font-size:88px;line-height:.92;letter-spacing:-.03em;color:var(--tinta)}
+.tag{font-family:var(--font-sans);font-size:14px;color:var(--texto-suave);margin-top:12px}
+</style></head><body>
+<svg viewBox="0 0 480 320">
+<!-- blocks: azul 336x272 (slab, bleeds right/bottom), bruma 128x160, tinta 128x144, tierra 96x32 pill
+     arrangement: one tall water slab with satellites, the slab bleeding off the right and bottom edges like the flyer's lower half
+     pattern: literal motif (wave) - the README calls the wave "la firma visual"; four wave lines in papel cut across the azul slab
+     scales: gaps space-4 (16px), radii radius-lg / radius-xl / pill, stroke trazo 2px, wave pitch 48px (space-12) -->
+<rect class="tinta r-lg" x="0" y="0" width="128" height="144"/>
+<rect class="bruma r-lg" x="0" y="160" width="128" height="176"/>
+<rect class="tierra pill" x="288" y="0" width="96" height="32"/>
+<rect class="azul r-xl" x="144" y="48" width="352" height="288"/>
+<path class="ola" d="M160 112 q24 -16 48 0 t48 0 t48 0 t48 0 t48 0 t48 0"/>
+<path class="ola" d="M160 160 q24 -16 48 0 t48 0 t48 0 t48 0 t48 0 t48 0"/>
+<path class="ola" d="M160 208 q24 -16 48 0 t48 0 t48 0 t48 0 t48 0 t48 0"/>
+<path class="ola" d="M160 256 q24 -16 48 0 t48 0 t48 0 t48 0 t48 0 t48 0"/>
+</svg>
+<div class="txt"><div class="name">SmartSip</div><div class="tag">¿Cuánta agua tomaste hoy? SmartSip sí lo sabe.</div></div>
+</body></html>

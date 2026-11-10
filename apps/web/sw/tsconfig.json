@@ -1,0 +1,10 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "WebWorker"],
+    "types": [],
+    // Los tipos de Workbox no están escritos para esta opción.
+    "exactOptionalPropertyTypes": false
+  },
+  "include": ["sw.ts", "tipos.d.ts"]
+}
