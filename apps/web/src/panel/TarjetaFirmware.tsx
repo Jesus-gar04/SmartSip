@@ -14,6 +14,7 @@ export function TarjetaFirmware() {
   const pct = useTienda((s) => Math.round((s.inst?.termo.actualizacion?.fraccion ?? 0) * 100));
   const bateria = useTienda((s) => s.inst?.termo.bateria ?? 1);
   const cargando = useTienda((s) => s.inst?.termo.cargando ?? false);
+  const remoto = useTienda((s) => s.remoto);
 
   return (
     <Tarjeta
@@ -35,6 +36,8 @@ export function TarjetaFirmware() {
         <p className="consola-nota">
           {!hayActualizacion(firmware)
             ? 'Tiene la versión más reciente.'
+            : !remoto
+              ? 'Hay una versión nueva. Empareja el termo con la app para instalarla.'
             : bateria < 0.3 && !cargando
               ? 'Con menos del 30 % de batería el termo no acepta actualizaciones, salvo que esté cargando.'
               : 'Hay una versión nueva: se instala desde la sección Termo de la app.'}

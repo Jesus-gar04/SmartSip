@@ -61,6 +61,7 @@ export function LineaMensajes() {
         {pulsoEstado > 0 && <Pulso key={pulsoEstado} direccion="termoAApp" reducido={reducido} tenue />}
         <span className="linea-estado">estado</span>
       </div>
+      {linea.length === 0 && <p className="linea-vacia">Aquí aparece cada mensaje entre el termo y la app, en el momento en que viaja.</p>}
       <ol className="linea-lista" aria-live="polite" aria-relevant="additions">
         <AnimatePresence initial={false}>
           {linea.map((m) => (

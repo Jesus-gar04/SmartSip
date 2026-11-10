@@ -228,6 +228,9 @@ body {
 
 .escenario-termo .visor {
   position: relative;
+  /* El escenario entero es el que queda fijo: el visor no se corre (venía
+   * con un `top` de cuando el visor era el elemento sticky). */
+  top: 0;
   z-index: 2;
   height: 100%;
   margin: 0;
@@ -819,4 +822,48 @@ body {
   border-radius: inherit;
   background: var(--agua);
   transition: width var(--dur-micro) linear;
+}
+
+/* ─── Escritorio: columnas parejas ───────────────────────────────────────
+ * La ayuda bajo el termo cabe entera; la línea de mensajes ocupa su columna
+ * de arriba abajo (no un recuadro suelto); los botones laterales del
+ * teléfono no cortan su borde en el tema Noche.
+ */
+@media (min-width: 1024px) {
+  .escenario-termo .visor-lienzo {
+    height: calc(100% - 56px);
+  }
+
+  .escenario .linea {
+    display: flex;
+    flex-direction: column;
+    height: min(700px, calc(100svh - 48px));
+    overflow: hidden;
+  }
+
+  .escenario .linea-lista {
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  /* Emparejado: sin teléfono dibujado, la línea toma su lugar. */
+  .escenario[data-remoto='true'] {
+    grid-template-columns: minmax(0, 1fr) 280px;
+  }
+
+  .escenario[data-remoto='true'] .linea {
+    height: min(600px, calc(100svh - 48px));
+  }
+
+  .telefono::before,
+  .telefono::after {
+    background: color-mix(in srgb, var(--tinta-fija) 70%, #8a7d72);
+  }
+}
+
+.linea-vacia {
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
 }

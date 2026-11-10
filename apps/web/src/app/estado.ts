@@ -351,6 +351,20 @@ export const app = {
     useApp.setState({ termo });
   },
 
+  /**
+   * Salir de "Conecta tu termo" sin emparejar: si ya había un termo, se
+   * vuelve a la app con ese mismo; si no, a "Tus datos".
+   */
+  volverDeEmparejar(): void {
+    const { usuario, perfil } = useApp.getState();
+    if (usuario && perfil?.termoId) {
+      useApp.setState({ fase: 'hoy', error: null });
+      void conectarTermo(usuario, perfil);
+    } else {
+      useApp.setState({ fase: 'perfil', error: null });
+    }
+  },
+
   /** Volver a emparejar: por ejemplo, el día de la demo con otro simulador. */
   emparejarOtro(): void {
     desconectarTermo();

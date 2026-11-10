@@ -339,3 +339,35 @@
   line-height: var(--l-funcion);
   font-weight: var(--p-funcion);
 }
+
+/* Atrás: arriba a la izquierda en el primer uso, discreto pero siempre a mano. */
+.atras {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e2);
+  justify-self: start;
+  min-height: 44px;
+  margin: 0 0 var(--e2) calc(-1 * var(--e2));
+  padding: 0 var(--e2);
+  border: 0;
+  border-radius: var(--radio-boton);
+  background: none;
+  color: var(--texto-suave);
+  font: inherit;
+  font-size: var(--t-etiqueta);
+  font-weight: var(--peso-medio);
+  cursor: pointer;
+  transition:
+    color var(--dur-micro) var(--curva),
+    background-color var(--dur-micro) var(--curva);
+}
+
+.atras:hover {
+  color: var(--tinta);
+  background: color-mix(in srgb, var(--tinta) 6%, transparent);
+}
+
+.atras:focus-visible {
+  outline: 2px solid var(--agua);
+  outline-offset: 2px;
+}

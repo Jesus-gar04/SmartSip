@@ -19,7 +19,7 @@ import {
 import { obtenerClima } from '../clima/clima-local.ts';
 import { InvitacionInstalar } from '../pwa/InvitacionInstalar.tsx';
 import { Boton, Deslizador } from '../ui/controles.tsx';
-import { IconoGota, IconoReloj } from '../ui/iconos.tsx';
+import { IconoFlecha, IconoGota, IconoReloj } from '../ui/iconos.tsx';
 import { Funcion, Pasos, TermoDibujo } from '../ui/TermoDibujo.tsx';
 import { transicion, useMovimientoReducido } from '../util/movimiento.ts';
 import { app, useApp } from './estado.ts';
@@ -322,6 +322,18 @@ export function Entrar() {
   );
 }
 
+// ─── Atrás ──────────────────────────────────────────────────────────────────
+
+/** Salida arriba a la izquierda, siempre en el mismo lugar del primer uso. */
+function Atras({ texto, alTocar }: { texto: string; alTocar: () => void }) {
+  return (
+    <button type="button" className="atras" onClick={alTocar}>
+      <IconoFlecha hacia="izquierda" />
+      {texto}
+    </button>
+  );
+}
+
 // ─── Perfil ─────────────────────────────────────────────────────────────────
 
 const ACTIVIDADES: ReadonlyArray<{ id: Actividad; nombre: string; texto: string; icono: ReactNode }> = [
@@ -368,6 +380,12 @@ export function PerfilInicial() {
         </div>
       }
     >
+      {editando ? (
+        <Atras texto="Volver" alTocar={() => useApp.setState({ fase: 'hoy' })} />
+      ) : (
+        // Aún no hay nada guardado: volver al inicio deja la sesión recién abierta.
+        <Atras texto="Volver al inicio" alTocar={() => void app.salir()} />
+      )}
       {!editando && <Pasos actual={1} total={3} nombres={PASOS} />}
       <h1 className="titulo-pantalla">{editando ? 'Tus datos' : 'Antes de empezar, cuéntanos un poco de ti'}</h1>
       <p className="texto-suave">Con tu peso y tu rutina calculamos cuánta agua te conviene tomar cada día.</p>
@@ -468,6 +486,15 @@ export function Emparejar() {
         </p>
       }
     >
+      {!listo && (
+        <Atras
+          texto="Atrás"
+          alTocar={() => {
+            if (e) app.cancelarCodigo(e.codigo);
+            app.volverDeEmparejar();
+          }}
+        />
+      )}
       <Pasos actual={listo ? 3 : 2} total={3} nombres={PASOS} />
       <h1 className="titulo-pantalla">{listo ? 'Listo, ya están conectados' : 'Conecta tu termo'}</h1>
       {!listo && (

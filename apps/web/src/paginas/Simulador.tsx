@@ -24,6 +24,8 @@ export function PaginaSimulador() {
   const aceleracion = useTienda((s) => s.inst?.aceleracion ?? 1);
   const conectado = useTienda((s) => s.inst?.enlace === 'conectado');
   const climaC = useTienda((s) => (s.clima ? Math.round(s.clima.clima.temperaturaC) : null));
+  // Emparejado, la app de verdad está en otro dispositivo: el teléfono dibujado sobra.
+  const remoto = useTienda((s) => s.remoto);
 
   useEffect(() => {
     if (iniciado) return; // StrictMode monta dos veces en desarrollo
@@ -76,29 +78,33 @@ export function PaginaSimulador() {
         </p>
       )}
 
-      <nav className="pestanas" aria-label="Vista">
-        <Segmentado
-          etiqueta="Vista"
-          valor={pestana}
-          alCambiar={(p) => useTienda.setState({ pestana: p })}
-          opciones={[
-            { valor: 'termo', etiqueta: 'Termo' },
-            { valor: 'app', etiqueta: 'App' },
-          ]}
-        />
-      </nav>
+      {!remoto && (
+        <nav className="pestanas" aria-label="Vista">
+          <Segmentado
+            etiqueta="Vista"
+            valor={pestana}
+            alCambiar={(p) => useTienda.setState({ pestana: p })}
+            opciones={[
+              { valor: 'termo', etiqueta: 'Termo' },
+              { valor: 'app', etiqueta: 'App' },
+            ]}
+          />
+        </nav>
+      )}
 
-      <main className="escenario" data-pestana={pestana}>
+      <main className="escenario" data-pestana={remoto ? 'termo' : pestana} data-remoto={remoto}>
         <section className="col col-termo" aria-label="El termo">
           <Escenario />
           <PanelControles />
         </section>
         <LineaMensajes />
-        <section className="col col-app" aria-label="La app">
-          <div className="telefono">
-            <PantallaApp marco />
-          </div>
-        </section>
+        {!remoto && (
+          <section className="col col-app" aria-label="La app">
+            <div className="telefono">
+              <PantallaApp marco />
+            </div>
+          </section>
+        )}
       </main>
 
       <FranjaMensajes />
