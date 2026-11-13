@@ -14,11 +14,14 @@ export interface ServiciosApp {
 
 const instancias = new Map<string, Promise<ServiciosApp>>();
 
-/** `app` para la PWA; `termo` para el simulador. Se crea una vez por página. */
-export function servicios(quien: 'app' | 'termo'): Promise<ServiciosApp> {
+/**
+ * `app` para la PWA; `termo` para el simulador; `reservas` para el formulario
+ * de la preventa (anónimo, sin tocar la sesión de la app). Se crea una vez por página.
+ */
+export function servicios(quien: 'app' | 'termo' | 'reservas'): Promise<ServiciosApp> {
   let p = instancias.get(quien);
   if (!p) {
-    const nombre = quien === 'app' ? '[DEFAULT]' : 'termo';
+    const nombre = quien === 'app' ? '[DEFAULT]' : quien;
     // Con `pnpm --filter smartsip-web dev:emulador`, todo va a la Emulator Suite
     // local (pnpm emuladores) y no toca el proyecto real.
     const emulador = import.meta.env['VITE_USAR_EMULADOR'] === '1';

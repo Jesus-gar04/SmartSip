@@ -25,6 +25,8 @@ import { Simulacion } from './simulacion.ts';
 import { iniciarAvisosTermo } from './avisos-termo.ts';
 import { leerEmparejamiento, TERMO_ID, type EmparejamientoTermo } from './emparejar.ts';
 import { servicios } from '../app/servicios.ts';
+import { exponerPuente } from '../telefono/puente.ts';
+import { perfilDePrueba, sembrarHistorial } from './historial.ts';
 const DESFASE_MIN = -300; // Barranquilla
 const CLAVE_FIRMWARE = `smartsip:termo:${TERMO_ID}:firmware`;
 
@@ -100,8 +102,13 @@ interface Datos {
   readonly uid: string | null;
 }
 
+/** Con tres semanas de historial de prueba, para que la app del teléfono no empiece vacía. */
 async function datosEnMemoria(): Promise<Datos> {
-  return { repositorio: new RepositorioEnMemoria(), ultimoId: 0, uid: null };
+  const repositorio = new RepositorioEnMemoria();
+  const perfil = perfilDePrueba(TERMO_ID, DESFASE_MIN);
+  await repositorio.guardarPerfil(perfil);
+  const ultimoId = await sembrarHistorial(repositorio, { termoId: TERMO_ID, desfaseMin: DESFASE_MIN, ahoraMs: Date.now(), perfil });
+  return { repositorio, ultimoId, uid: null };
 }
 
 async function datosEnFirebase(): Promise<Datos> {
@@ -114,6 +121,10 @@ async function datosEnFirebase(): Promise<Datos> {
   // se borró, se toma también el último guardado en Firestore.
   const local = Number(leerLocal(claveUltimoId('firebase')) ?? 0) || 0;
   const remoto = await repositorio.ultimoIdDeTermo(TERMO_ID).catch(() => 0);
+  // La app del teléfono necesita un perfil: si esta cuenta anónima no tiene, uno de prueba.
+  if (!(await repositorio.leerPerfil().catch(() => null))) {
+    await repositorio.guardarPerfil(perfilDePrueba(TERMO_ID, DESFASE_MIN)).catch((e) => console.warn('Perfil:', e));
+  }
   return { repositorio, ultimoId: Math.max(local, remoto), uid: usuario.uid };
 }
 
@@ -209,6 +220,21 @@ export async function iniciarSimulador(modo: ModoDatos): Promise<void> {
   );
 
   s.iniciar();
+  // La app del teléfono dibujado (iframe) usa este repositorio y este canal.
+  if (!emparejado) {
+    exponerPuente({
+      repositorio: s.repositorio,
+      transporte: s.bus,
+      termoId: TERMO_ID,
+      desfaseMin: DESFASE_MIN,
+      ahora: () => s.reloj.ahora(),
+      resolver: (r, d) => s.sincronizador.resolverDescenso(r, d),
+      estado: () => {
+        const t = s.termo.estado();
+        return { temperaturaC: t.temperaturaC, bateria: t.bateria, nivelMl: t.nivelMl, firmware: t.firmware };
+      },
+    });
+  }
   set({ fase: 'lista', modo, inst: s.instantanea(), remoto: emparejado !== null });
   if (emparejado) void conectarConApp(s, emparejado);
   bucle(s);

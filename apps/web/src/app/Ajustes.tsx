@@ -184,6 +184,20 @@ const DETALLE_AVISOS: Record<EstadoAvisos, string> = {
 };
 
 function AvisosDelCelular() {
+  const enTelefono = useApp((s) => s.enTelefono);
+  if (enTelefono) {
+    return (
+      <FilaControl
+        icono={<IconoCampana />}
+        titulo="Avisos en este celular"
+        detalle="En el simulador, los avisos llegan a la app emparejada en otro celular."
+      />
+    );
+  }
+  return <AvisosDeVerdad />;
+}
+
+function AvisosDeVerdad() {
   const estado = useEstadoAvisos();
   const [ocupado, setOcupado] = useState(false);
   const [nota, setNota] = useState<string | null>(null);
@@ -265,6 +279,7 @@ const RUTINA = { baja: 'tranquila', media: 'movida', alta: 'intensa' } as const;
 export function Ajustes() {
   const perfil = useApp((s) => s.perfil);
   const usuario = useApp((s) => s.usuario);
+  const enTelefono = useApp((s) => s.enTelefono);
   const clima = useClimaHoy();
   const [tema, setTema] = useState<PreferenciaTema>(temaGuardado);
   const meta = perfil ? calcularMeta(perfil, { temperaturaC: clima ?? 25 }).totalMl : null;
@@ -294,7 +309,7 @@ export function Ajustes() {
         </span>
         <div>
           <p className="perfil-nombre">{perfil?.nombre ?? 'Tu perfil'}</p>
-          <p className="texto-suave">{usuario?.anonimo ? 'Usas SmartSip sin cuenta por ahora' : usuario?.email}</p>
+          <p className="texto-suave">{enTelefono ? 'Perfil de prueba del simulador' : usuario?.anonimo ? 'Usas SmartSip sin cuenta por ahora' : usuario?.email}</p>
         </div>
       </div>
 
@@ -388,10 +403,12 @@ export function Ajustes() {
         </FilaControl>
       </div>
 
-      <div className="grupo-ajustes">
-        <p className="sello sello-suelto">Cuenta</p>
-        <Fila icono={<IconoSalir />} titulo="Cerrar sesión" alTocar={() => void app.salir()} salida />
-      </div>
+      {!enTelefono && (
+        <div className="grupo-ajustes">
+          <p className="sello sello-suelto">Cuenta</p>
+          <Fila icono={<IconoSalir />} titulo="Cerrar sesión" alTocar={() => void app.salir()} salida />
+        </div>
+      )}
 
       <p className="texto-suave ajustes-pie">SmartSip · Hidrata hoy, vive mejor.</p>
     </section>

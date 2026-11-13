@@ -454,22 +454,6 @@ button {
   display: none;
 }
 
-.app-cabecera h2 {
-  font-size: var(--t-titulo);
-  line-height: var(--l-titulo);
-  letter-spacing: var(--k-titulo);
-}
-
-.app-conexion {
-  color: var(--texto-suave);
-  font-size: var(--t-etiqueta);
-  line-height: var(--l-etiqueta);
-}
-
-.app-litros {
-  padding: var(--e4) 0;
-}
-
 .litros {
   font-size: var(--t-cifra);
   line-height: var(--l-cifra);
@@ -482,26 +466,6 @@ button {
   font-size: var(--t-unidad-cifra);
   font-weight: var(--peso-regular);
   letter-spacing: 0;
-}
-
-.app-detalle {
-  color: var(--texto-suave);
-}
-
-.app-vacio {
-  display: grid;
-  justify-items: center;
-  gap: var(--e4);
-  padding: var(--e8) 0;
-  color: var(--texto-suave);
-}
-
-.silueta {
-  width: 56px;
-  height: 140px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1;
 }
 
 .tarjeta {
@@ -526,13 +490,6 @@ button {
 
 .tarjeta .boton:not(.boton-principal) {
   border-color: color-mix(in srgb, currentColor 40%, transparent);
-}
-
-.app-pie {
-  margin-top: var(--e4);
-  color: var(--texto-suave);
-  font-size: var(--t-etiqueta);
-  line-height: var(--l-etiqueta);
 }
 
 /* ─── Escritorio ─────────────────────────────────────────────────────────── */

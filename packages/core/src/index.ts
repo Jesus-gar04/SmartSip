@@ -19,6 +19,7 @@ export * from './protocolo.ts';
 export * from './recordatorios.ts';
 export * from './registros.ts';
 export * from './reloj.ts';
+export * from './reservas.ts';
 export * from './repositorio.ts';
 export * from './sincronizador.ts';
 export * from './tandas.ts';

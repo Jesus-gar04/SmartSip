@@ -18,3 +18,4 @@ export {
   type ServiciosFirebase,
 } from './iniciar.ts';
 export { RepositorioFirestore } from './repositorio-firestore.ts';
+export { COLECCION_PREVENTA, COLECCION_RESERVAS, ReservasFirebase } from './reservas-firebase.ts';

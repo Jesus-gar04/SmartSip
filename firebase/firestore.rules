@@ -10,6 +10,7 @@ rules_version = '2';
 //   idempotente el registro: reenviar un evento no suma dos veces.
 // - Los totales del día solo crecen.
 // - El emparejamiento por código une una cuenta con un termo, una sola vez.
+// - La preventa no aparta más termos de los que hay.
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -338,6 +339,69 @@ service cloud.firestore {
           && dispositivoId.matches('^[0-9a-f]{32}$')
           && dispositivoValido(request.resource.data);
       }
+    }
+
+    // ─── Preventa ───────────────────────────────────────────────────────────
+    //
+    // preventa/actual { reservados } lo lee cualquiera: es el contador de
+    // cupos. Solo sube en la misma escritura que crea la reserva que ocupa
+    // esos cupos, y nunca pasa de CUPOS(). La reserva toma como número el
+    // primer cupo que ocupa (1, 2, 3…): dos personas no pueden quedarse con el
+    // mismo número ni con el último termo.
+    //
+    // reservas/{numero} trae datos personales: solo quien la hizo puede
+    // leerla. Nadie la cambia ni la borra desde la app.
+
+    function CUPOS() {
+      return 50; // igual que CUPOS_PREVENTA en smartsip-core
+    }
+
+    function rutaPreventa() {
+      return /databases/$(database)/documents/preventa/actual;
+    }
+
+    function rutaReserva(numero) {
+      return /databases/$(database)/documents/reservas/$(string(numero));
+    }
+
+    function cuposTomados(antes, despues) {
+      return despues is int && despues > antes && despues <= CUPOS()
+        && existsAfter(rutaReserva(antes + 1))
+        && getAfter(rutaReserva(antes + 1)).data.cantidad == despues - antes;
+    }
+
+    function reservaValida(numero, d) {
+      let antes = exists(rutaPreventa()) ? get(rutaPreventa()).data.reservados : 0;
+      return d.keys().hasOnly(['nombre', 'celular', 'correo', 'cantidad', 'entrega', 'lugar', 'acepta', 'uid', 'creadoEn'])
+        && d.keys().hasAll(['nombre', 'celular', 'correo', 'cantidad', 'entrega', 'lugar', 'acepta', 'uid', 'creadoEn'])
+        && d.uid == request.auth.uid
+        && numero == string(antes + 1)
+        && getAfter(rutaPreventa()).data.reservados == antes + d.cantidad
+        && d.nombre is string && d.nombre.size() >= 2 && d.nombre.size() <= 80
+        && d.celular is string && d.celular.matches('^3[0-9]{9}$')
+        && d.correo is string && d.correo.size() <= 120 && d.correo.matches('^[^@ ]+@[^@ ]+[.][^@ ]{2,}$')
+        && d.cantidad is int && d.cantidad >= 1 && d.cantidad <= 2
+        && d.entrega in ['universidad', 'gimnasio', 'domicilio']
+        && d.lugar is string && d.lugar.size() >= 2 && d.lugar.size() <= 120
+        && d.acepta == true
+        && d.creadoEn == request.time;
+    }
+
+    match /preventa/{documento} {
+      allow get: if documento == 'actual';
+      allow list, delete: if false;
+      allow create: if documento == 'actual' && request.auth != null
+        && request.resource.data.keys().hasOnly(['reservados'])
+        && cuposTomados(0, request.resource.data.reservados);
+      allow update: if documento == 'actual' && request.auth != null
+        && request.resource.data.keys().hasOnly(['reservados'])
+        && cuposTomados(resource.data.reservados, request.resource.data.reservados);
+    }
+
+    match /reservas/{numero} {
+      allow get: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow list, update, delete: if false;
+      allow create: if request.auth != null && reservaValida(numero, request.resource.data);
     }
   }
 }

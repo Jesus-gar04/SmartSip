@@ -141,7 +141,11 @@ function Hoy() {
   }, [metaMl, hoyMl, recordatorio, hoyListo]);
 
   return (
-    <section className="hoy" style={{ ['--llenado' as string]: fraccion }} aria-label="Hoy">
+    <section
+      className={`hoy ${pendiente ? 'hoy-con-pregunta' : ''}`}
+      style={{ ['--llenado' as string]: fraccion }}
+      aria-label="Hoy"
+    >
       <header className="hoy-cabecera">
         <span className="sello">
           {enlace === 'conectado' ? 'Termo cerca' : 'Termo lejos'}

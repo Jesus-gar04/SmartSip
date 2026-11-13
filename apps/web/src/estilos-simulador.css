@@ -63,7 +63,7 @@ body {
 }
 
 /* En el celular, el selector de datos va en su propia fila. */
-.cabecera > .segmentado {
+.cabecera-datos {
   order: 5;
   grid-column: 1 / -1;
 }
@@ -636,7 +636,7 @@ body {
     order: 0;
   }
 
-  .cabecera > .segmentado {
+  .cabecera-datos {
     order: 0;
     grid-column: auto;
   }
@@ -866,4 +866,375 @@ body {
   color: var(--texto-suave);
   font-size: var(--t-etiqueta);
   line-height: var(--l-etiqueta);
+}
+
+/* ═══ Responsive ════════════════════════════════════════════════════════════
+ * Celular (<640): una columna, cabecera de dos líneas, termo fijo y compacto.
+ * Tablet y celular acostado (640–1023): termo fijo a la izquierda, consola a
+ * la derecha. Escritorio estrecho (1024–1279): termo y teléfono; los
+ * mensajes van en la franja de abajo. Escritorio ancho (≥1280): las tres
+ * columnas de siempre.
+ * ═════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Alto de la barra Termo / App: 8 + 48 + 8 + 1 de borde. */
+  --alto-pestanas: 65px;
+  --alto-franja: calc(52px + env(safe-area-inset-bottom));
+}
+
+.col-consola {
+  display: grid;
+  gap: var(--e4);
+  min-width: 0;
+}
+
+/* Las opciones se reparten el ancho y nunca empujan fuera de la pantalla. */
+.segmentado {
+  max-width: 100%;
+}
+
+.segmentado-opcion {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Cada tarjeta mira su propio ancho, no el de la pantalla: sirve igual en el
+ * celular que en una columna estrecha del escritorio. */
+.consola-tarjeta {
+  min-width: 0;
+  container-type: inline-size;
+}
+
+@container (max-width: 420px) {
+  /* Título y lectura en la misma línea; la explicación debajo, a lo ancho. */
+  .consola-cabecera {
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    align-items: center;
+    row-gap: var(--e2);
+  }
+
+  .consola-titulos {
+    display: contents;
+  }
+
+  .funcion-circulo {
+    grid-area: 1 / 1;
+  }
+
+  .funcion-nombre {
+    grid-area: 1 / 2;
+    min-width: 0;
+  }
+
+  .consola-lectura {
+    grid-area: 1 / 3;
+    max-width: 55cqi;
+  }
+
+  .consola-explica {
+    grid-area: 2 / 1 / 3 / -1;
+    margin: 0;
+  }
+}
+
+@container (max-width: 300px) {
+  .avisos-botones {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* La pantalla ampliada se encoge con el escenario. */
+.escenario-termo {
+  container-type: inline-size;
+}
+
+.escenario-termo .visor-ayuda {
+  padding: 0 var(--e3);
+  white-space: normal;
+  text-wrap: balance;
+}
+
+@container (max-width: 380px) {
+  .pantalla-ampliada {
+    right: var(--e2);
+    padding: var(--e1);
+  }
+
+  .pantalla-titulo {
+    padding: 0 var(--e1) 2px;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+  }
+
+  .pantalla-vidrio {
+    min-height: 56px;
+    gap: var(--e2);
+    padding: var(--e1) var(--e2);
+    border-width: 2px;
+  }
+
+  .pantalla-temp {
+    font-size: 28px;
+  }
+
+  .pantalla-unidad {
+    font-size: 13px;
+  }
+
+  .escenario-termo .visor-ayuda {
+    font-size: 12px;
+    line-height: 16px;
+  }
+}
+
+/* ─── Celular y tablet ─── */
+@media (max-width: 1023px) {
+  /* Cabecera de dos líneas: marca arriba; hora, fecha y conexión abajo. */
+  .cabecera {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--e1) var(--e3);
+    padding: var(--e3) var(--margen);
+  }
+
+  .marca {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  /* Hora y conexión en una línea; la fecha, entera, debajo. */
+  .reloj {
+    display: contents;
+  }
+
+  .reloj-hora {
+    grid-area: 2 / 1;
+    font-size: var(--t-funcion);
+    line-height: var(--l-funcion);
+    letter-spacing: -0.01em;
+  }
+
+  .reloj-fecha {
+    grid-area: 3 / 1 / 4 / -1;
+  }
+
+  .cabecera-sello {
+    order: 0;
+    grid-area: 2 / 2;
+    justify-self: end;
+    white-space: nowrap;
+  }
+
+  /* El selector de datos baja a la consola (tarjeta "Datos"). */
+  .cabecera-datos {
+    display: none;
+  }
+
+  .pestanas {
+    height: var(--alto-pestanas);
+    padding-block: var(--e2);
+  }
+
+  .escenario-termo {
+    top: calc(var(--alto-pestanas) + var(--e3));
+    height: clamp(220px, 36svh, 340px);
+    /* Tapa lo que pasa por detrás, también en las esquinas redondeadas. */
+    box-shadow: 0 0 0 var(--e4) var(--papel);
+  }
+
+  .escenario[data-remoto='true'] .escenario-termo {
+    top: var(--e3);
+  }
+}
+
+/* ─── Tablet y celular acostado: dos columnas ─── */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .escenario[data-pestana='termo'] .col-termo {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--e5);
+    align-items: start;
+  }
+
+  .escenario-termo {
+    height: clamp(220px, calc(100svh - var(--alto-pestanas) - var(--alto-franja) - var(--e8)), 640px);
+    margin-bottom: 0;
+  }
+
+  .escenario[data-remoto='true'] .escenario-termo {
+    height: clamp(220px, calc(100svh - var(--alto-franja) - var(--e8)), 640px);
+  }
+
+  /* La app en la pestaña App, centrada y a un ancho de teléfono. */
+  .escenario[data-pestana='app'] .col-app {
+    max-width: 480px;
+    margin-inline: auto;
+  }
+}
+
+/* Celular acostado: hay poco alto, así que la cabecera va en una sola línea. */
+@media (max-width: 1023px) and (max-height: 520px) and (orientation: landscape) {
+  .cabecera {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding-block: var(--e2);
+  }
+
+  .marca {
+    grid-column: 1;
+  }
+
+  .reloj {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    grid-area: 1 / 2;
+    gap: 0 var(--e2);
+    min-width: 0;
+  }
+
+  .reloj-hora,
+  .reloj-fecha {
+    grid-area: auto;
+  }
+
+  .cabecera-sello {
+    grid-area: 1 / 3;
+  }
+
+  .escenario {
+    padding-top: var(--e3);
+  }
+
+  .escenario-termo .visor-ayuda {
+    display: none;
+  }
+
+  .escenario-termo .visor-lienzo {
+    height: 100%;
+  }
+}
+
+/* ─── Escritorio ─── */
+@media (min-width: 1024px) {
+  .solo-compacto {
+    display: none;
+  }
+}
+
+/* Escritorio estrecho: termo y teléfono; los mensajes, en la franja. */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .escenario:not([data-remoto='true']) {
+    grid-template-columns: minmax(0, 1fr) 340px;
+  }
+
+  .escenario:not([data-remoto='true']) .linea {
+    display: none;
+  }
+
+  .pagina:has(.escenario:not([data-remoto='true'])) {
+    padding-bottom: var(--alto-franja);
+  }
+
+  .pagina:has(.escenario:not([data-remoto='true'])) .franja {
+    display: block;
+  }
+
+  .escenario-termo {
+    height: clamp(320px, 52svh, 440px);
+    box-shadow: 0 0 0 var(--e4) var(--papel);
+  }
+}
+
+/* ─── La app real dentro del teléfono (iframe) ───────────────────────────
+ * La app corre con su propio ancho de celular: se ve como en un teléfono.
+ * Arriba, la barra de estado del iPhone dibujado.
+ */
+.app-pantalla-real {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-iframe-caja {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.app-iframe {
+  display: block;
+  flex: none;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--papel);
+}
+
+.app-abriendo {
+  margin: auto;
+  color: var(--texto-suave);
+  font-size: var(--t-etiqueta);
+}
+
+.app-barra-estado {
+  display: inline-flex;
+  justify-content: flex-end;
+  width: 56px;
+}
+
+.app-barra-pila {
+  position: relative;
+  width: 24px;
+  height: 12px;
+  border: 1.5px solid currentColor;
+  border-radius: 4px;
+}
+
+.app-barra-pila::before {
+  content: '';
+  position: absolute;
+  inset: 1.5px 6px 1.5px 1.5px;
+  border-radius: 1.5px;
+  background: currentColor;
+}
+
+.app-barra-pila::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  right: -4px;
+  width: 2px;
+  height: 4px;
+  border-radius: 0 1px 1px 0;
+  background: currentColor;
+}
+
+/* Celular y tablet (pestaña App): la app ocupa el alto disponible, sin marco. */
+@media (max-width: 1023px) {
+  .app-pantalla-real {
+    height: max(520px, calc(100svh - var(--alto-pestanas) - var(--alto-franja) - var(--e8)));
+    overflow: hidden;
+    border: var(--linea-fina) solid var(--linea);
+    border-radius: var(--radio-tarjeta);
+  }
+
+  .app-pantalla-real .app-barra {
+    display: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .telefono .app-pantalla-real {
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .telefono .app-pantalla-real .app-barra {
+    margin: 0;
+    padding: var(--e3) var(--e8) var(--e1);
+    color: var(--tinta);
+  }
 }

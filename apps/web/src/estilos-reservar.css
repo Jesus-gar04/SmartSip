@@ -1,0 +1,588 @@
+/* ═══ /preventa: la preventa, como el flyer ══════════════════════════════════
+ * Papel arriba con la pregunta; ola; agua abajo con el precio, los cupos y la
+ * tarjeta del formulario. En escritorio la tarjeta sube sobre la ola.
+ * Se carga solo con la página (ruta diferida).
+ * ═════════════════════════════════════════════════════════════════════════ */
+
+.reserva {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+  background: var(--papel);
+  overflow-x: clip;
+}
+
+/* ─── Papel ─── */
+
+.reserva-papel {
+  padding: calc(var(--e4) + env(safe-area-inset-top)) var(--margen) var(--e12);
+}
+
+.reserva-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--e3);
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.reserva-cabecera .logo {
+  height: 28px;
+}
+
+.reserva-cabecera .sello {
+  white-space: normal;
+  text-align: center;
+}
+
+.reserva-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--e4);
+  max-width: 1120px;
+  margin: var(--e10) auto 0;
+}
+
+.reserva-intro .pregunta {
+  max-width: 9ch;
+}
+
+.reserva-intro .firma {
+  margin: var(--e3) 0 0;
+}
+
+.reserva-lema {
+  max-width: 34ch;
+  margin: var(--e4) 0 0;
+  color: var(--texto-suave);
+  font-size: var(--t-cuerpo);
+  line-height: var(--l-cuerpo);
+}
+
+.reserva-termo {
+  width: clamp(72px, 22vw, 150px);
+  height: auto;
+  transform: rotate(6deg);
+}
+
+/* ─── Agua ─── */
+
+.reserva-agua {
+  position: relative;
+  flex: 1 0 auto;
+  padding: var(--e8) var(--margen) calc(var(--e8) + env(safe-area-inset-bottom));
+  background: var(--agua);
+  color: var(--sobre-agua);
+}
+
+.reserva-agua .ola {
+  position: absolute;
+  bottom: calc(100% - 2px);
+  left: 0;
+  width: 200%;
+  height: 40px;
+  animation: ola var(--dur-ciclo-ola) linear infinite;
+}
+
+.reserva-agua .ola-atras {
+  bottom: calc(100% + 6px);
+  fill: var(--bruma);
+  animation-duration: calc(var(--dur-ciclo-ola) * 1.6);
+  animation-direction: reverse;
+}
+
+.reserva-agua .ola-frente {
+  fill: var(--agua);
+}
+
+.reserva-columnas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--e8);
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.reserva-rotulo {
+  margin: 0;
+  font-family: var(--f-sello);
+  font-size: var(--t-sello);
+  line-height: var(--l-sello);
+  font-weight: var(--p-sello);
+  letter-spacing: var(--k-sello);
+  text-transform: uppercase;
+}
+
+.reserva-precio {
+  margin: var(--e2) 0 0;
+  font-family: var(--f-cifra);
+  font-size: clamp(56px, 17vw, 104px);
+  line-height: 0.95;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.reserva-antes {
+  margin: var(--e2) 0 0;
+  font-size: var(--t-cuerpo);
+  line-height: var(--l-cuerpo);
+}
+
+.reserva-antes s {
+  opacity: 0.85;
+}
+
+/* Cupos: cincuenta termos en fila; los apartados quedan en contorno. */
+.reserva-cupos {
+  display: grid;
+  gap: var(--e3);
+  margin-top: var(--e8);
+}
+
+.reserva-cupos-texto {
+  margin: 0;
+  font-family: var(--f-funcion);
+  font-size: var(--t-funcion);
+  line-height: var(--l-funcion);
+  font-weight: var(--p-funcion);
+}
+
+.reserva-cupos-fila {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 14px));
+  gap: 6px 8px;
+}
+
+.reserva-cupo {
+  display: block;
+  aspect-ratio: 9 / 22;
+  border: 2px solid color-mix(in srgb, var(--sobre-agua) 55%, transparent);
+  border-radius: 5px 5px 6px 6px;
+  transform-origin: bottom;
+}
+
+.reserva-cupo-libre {
+  border-color: var(--sobre-agua);
+  background: var(--sobre-agua);
+}
+
+.reserva-incluye {
+  display: grid;
+  gap: var(--e2);
+  margin: var(--e8) 0 0;
+  padding: 0;
+  list-style: none;
+  font-weight: var(--peso-medio);
+}
+
+.reserva-incluye li {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+}
+
+.reserva-incluye svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+
+/* ─── Tarjeta ─── */
+
+.reserva-tarjeta {
+  min-width: 0;
+  padding: var(--e6) var(--e5);
+  border-radius: var(--radio-foto);
+  background: var(--superficie);
+  color: var(--tinta);
+  box-shadow: 0 24px 48px -24px color-mix(in srgb, #000 45%, transparent);
+}
+
+.reserva-titulo {
+  margin: 0;
+  font-family: var(--f-titulo);
+  font-size: var(--t-titulo);
+  line-height: var(--l-titulo);
+  font-weight: var(--p-titulo);
+  letter-spacing: var(--k-titulo);
+}
+
+.reserva-nota {
+  margin: var(--e2) 0 0;
+  color: var(--texto-suave);
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+}
+
+.reserva-formulario {
+  max-width: none;
+  margin: 0;
+}
+
+.campo-error {
+  margin: 0;
+  color: var(--cacao);
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+  font-weight: var(--peso-medio);
+}
+
+.campo-caja[data-error='true'] {
+  border-color: var(--cacao);
+}
+
+.reserva-formulario .campo-caja input::placeholder {
+  color: color-mix(in srgb, var(--texto-suave) 70%, transparent);
+}
+
+/* Cantidad: − 1 + y el total a la derecha. */
+.reserva-cantidad {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+}
+
+.reserva-paso {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1.5px solid var(--borde);
+  border-radius: var(--radio-boton);
+  background: var(--superficie);
+  color: var(--tinta);
+  font-family: var(--fuente-display);
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.reserva-paso:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.reserva-cantidad-valor {
+  min-width: 2ch;
+  font-family: var(--fuente-display);
+  font-size: var(--t-titulo);
+  font-weight: 800;
+  text-align: center;
+}
+
+.reserva-total {
+  display: grid;
+  justify-items: end;
+  margin-left: auto;
+  font-family: var(--fuente-display);
+  font-size: var(--t-funcion);
+  font-weight: 700;
+}
+
+.reserva-total-rotulo {
+  color: var(--texto-suave);
+  font-family: var(--fuente-sans);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+/* Entrega: tres opciones en píldora. */
+.reserva-entrega {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.reserva-entrega legend {
+  margin-bottom: var(--e2);
+  padding: 0;
+}
+
+.reserva-opciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e2);
+}
+
+.reserva-opcion {
+  position: relative;
+  flex: 1 1 auto;
+}
+
+.reserva-opcion input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.reserva-opcion span {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  padding: 0 var(--e4);
+  border: 1.5px solid var(--borde);
+  border-radius: var(--radio-sello);
+  font-size: var(--t-etiqueta);
+  font-weight: var(--peso-medio);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-micro) var(--curva),
+    color var(--dur-micro) var(--curva),
+    border-color var(--dur-micro) var(--curva);
+}
+
+.reserva-opcion input:checked + span {
+  border-color: var(--tinta);
+  background: var(--tinta);
+  color: var(--papel);
+}
+
+.reserva-opcion input:focus-visible + span {
+  outline: 2px solid var(--agua);
+  outline-offset: 2px;
+}
+
+.reserva-entrega[aria-invalid='true'] .reserva-opcion span {
+  border-color: var(--cacao);
+}
+
+.reserva-lugar {
+  overflow: hidden;
+}
+
+/* El hueco del foco no se corta al desplegar el campo. */
+.reserva-lugar > .campo {
+  padding: 3px;
+  margin: -3px;
+}
+
+.reserva-acepta {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: var(--e3);
+  align-items: start;
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+  cursor: pointer;
+}
+
+.reserva-acepta input {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  accent-color: var(--agua);
+}
+
+.reserva-fallo {
+  margin: 0;
+  padding: var(--e3) var(--e4);
+  border: 1.5px solid var(--cacao);
+  border-radius: var(--radio-boton);
+  color: var(--cacao);
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+  font-weight: var(--peso-medio);
+}
+
+.reserva-formulario .boton-principal {
+  width: 100%;
+}
+
+/* ─── Confirmación y agotado ─── */
+
+.reserva-hecha,
+.reserva-agotado {
+  display: grid;
+  justify-items: center;
+  gap: var(--e3);
+  text-align: center;
+}
+
+.reserva-termo-chico {
+  width: 72px;
+  height: auto;
+}
+
+.reserva-codigo {
+  margin: 0;
+  color: var(--agua-texto);
+  font-family: var(--f-cifra);
+  font-size: 44px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.reserva-datos {
+  display: grid;
+  width: 100%;
+  margin: var(--e2) 0 0;
+  border-top: var(--linea-fina) solid var(--linea);
+  text-align: left;
+}
+
+.reserva-datos > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--e4);
+  padding: var(--e3) 0;
+  border-bottom: var(--linea-fina) solid var(--linea);
+}
+
+.reserva-datos dt {
+  color: var(--texto-suave);
+  font-size: var(--t-etiqueta);
+}
+
+.reserva-datos dd {
+  margin: 0;
+  font-weight: var(--peso-medio);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.reserva-hecha .boton {
+  width: 100%;
+  margin-top: var(--e2);
+}
+
+/* ─── Pie ─── */
+
+.reserva-pie {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--e3) var(--e6);
+  max-width: 1120px;
+  margin: var(--e12) auto 0;
+  font-size: var(--t-etiqueta);
+  line-height: var(--l-etiqueta);
+}
+
+.reserva-pie p {
+  margin: 0;
+}
+
+.reserva-firma {
+  color: var(--sobre-agua);
+}
+
+/* ─── Celular: el QR trae aquí para apartar, así que el formulario va primero ───
+ * Portada corta (sin lema), la tarjeta sube sobre la ola y el precio grande,
+ * los cupos y lo que incluye quedan debajo del formulario. */
+
+.reserva-resumen {
+  display: none;
+}
+
+@media (max-width: 899px) {
+  .reserva-papel {
+    padding-bottom: var(--e16);
+  }
+
+  .reserva-intro {
+    margin-top: var(--e6);
+    align-items: center;
+  }
+
+  .reserva-intro .pregunta {
+    font-size: clamp(36px, 10.5vw, 48px);
+  }
+
+  .reserva-lema {
+    display: none;
+  }
+
+  .reserva-termo {
+    width: clamp(56px, 16vw, 84px);
+  }
+
+  .reserva-tarjeta {
+    position: relative;
+    z-index: 1;
+    order: -1;
+    margin-top: calc(-1 * var(--e16));
+  }
+
+  .reserva-resumen {
+    display: block;
+    margin: var(--e2) 0 0;
+    font-size: var(--t-etiqueta);
+    line-height: var(--l-etiqueta);
+  }
+
+  .reserva-resumen strong {
+    font-family: var(--fuente-display);
+    font-size: var(--t-funcion);
+    font-weight: 800;
+  }
+
+  .reserva-resumen s {
+    color: var(--texto-suave);
+  }
+
+  .reserva-resumen-cupos {
+    display: block;
+    margin-top: 2px;
+    color: var(--agua-texto);
+    font-weight: var(--peso-medio);
+  }
+}
+
+/* ─── Pantallas anchas: oferta a la izquierda, tarjeta a la derecha ─── */
+
+@media (min-width: 900px) {
+  .reserva-papel {
+    padding-bottom: var(--e16);
+  }
+
+  .reserva-intro {
+    margin-top: var(--e12);
+  }
+
+  .reserva-intro .pregunta {
+    font-size: clamp(56px, 7vw, 88px);
+  }
+
+  /* El termo, a la izquierda de la tarjeta que sube: nunca debajo de ella. */
+  .reserva-termo {
+    margin-right: calc(420px + var(--e12) + var(--e8));
+    width: 112px;
+  }
+
+  .reserva-columnas {
+    grid-template-columns: minmax(0, 1fr) 420px;
+    gap: var(--e12);
+    align-items: start;
+  }
+
+  /* La tarjeta sube sobre la ola. */
+  .reserva-tarjeta {
+    position: relative;
+    z-index: 1;
+    margin-top: -280px;
+    padding: var(--e8);
+  }
+
+  .reserva-cupos-fila {
+    grid-template-columns: repeat(25, minmax(0, 16px));
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1099px) {
+  .reserva-termo {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reserva-agua .ola {
+    animation: none;
+  }
+}

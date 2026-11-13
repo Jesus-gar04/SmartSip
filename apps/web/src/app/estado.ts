@@ -31,11 +31,13 @@ import {
   type Actividad,
   type Emparejamiento,
   type Perfil,
+  type Repositorio,
   type ServicioCuenta,
   type Usuario,
 } from 'smartsip-core';
-import type { EmparejamientoFirebase, RepositorioFirestore } from 'smartsip-firebase';
+import type { EmparejamientoFirebase } from 'smartsip-firebase';
 import { enviarAviso, escucharAvisosEnApp, revisarAvisos, type ResultadoEnvio } from '../pwa/avisos.ts';
+import { puenteDelSimulador, type PuenteTelefono } from '../telefono/puente.ts';
 import { servicios } from './servicios.ts';
 
 export type FaseApp = 'cargando' | 'bienvenida' | 'entrar' | 'perfil' | 'emparejar' | 'hoy' | 'error';
@@ -67,6 +69,8 @@ interface EstadoApp {
   firmwareTermo: string | null;
   /** A4: la actualización en curso, si hay una. */
   actualizacion: EstadoActualizacion | null;
+  /** La app corre dentro del teléfono dibujado del simulador. */
+  enTelefono: boolean;
 }
 
 export const useApp = create<EstadoApp>(() => ({
@@ -87,6 +91,7 @@ export const useApp = create<EstadoApp>(() => ({
   avisoEnApp: null,
   firmwareTermo: null,
   actualizacion: null,
+  enTelefono: false,
 }));
 
 escucharAvisosEnApp((avisoEnApp) => useApp.setState({ avisoEnApp }));
@@ -98,7 +103,7 @@ export function useGrados(): (celsius: number) => string {
 }
 
 let cuenta: ServicioCuenta | null = null;
-let repo: RepositorioFirestore | null = null;
+let repo: Repositorio | null = null;
 let emparejamiento: EmparejamientoFirebase | null = null;
 let conexion: {
   cerrar(): void;
@@ -130,7 +135,9 @@ async function curvaDeHoy(fecha: string): Promise<{ curva: Curva; deHabito: bool
 }
 
 async function publicarRitmoAhora(): Promise<void> {
-  const { usuario, perfil, hoyMl, hoyListo } = useApp.getState();
+  const { usuario, perfil, hoyMl, hoyListo, enTelefono } = useApp.getState();
+  // En el simulador el termo está en la misma página: no hay avisos que programar.
+  if (enTelefono) return;
   // Sin el resumen de hoy, el termo creería que no has bebido nada.
   if (!usuario || !perfil?.termoId || ultimaMeta <= 0 || !hoyListo) return;
   const fecha = claveDia(Date.now(), perfil.desfaseMin);
@@ -231,8 +238,86 @@ async function seguirCon(usuario: Usuario): Promise<void> {
   if (perfil?.termoId) void conectarTermo(usuario, perfil);
 }
 
+/**
+ * La app dentro del teléfono del simulador: entra directo a Hoy con el
+ * repositorio y el canal del simulador. No crea otro sincronizador (el del
+ * simulador ya guarda cada sorbo): escucha el día, las preguntas pendientes y
+ * lo que dice el termo, y le manda sus preferencias y el software nuevo.
+ */
+async function iniciarEnTelefono(p: PuenteTelefono): Promise<void> {
+  repo = p.repositorio;
+  const perfil = await p.repositorio.leerPerfil();
+  if (!perfil) {
+    useApp.setState({ fase: 'error', error: 'El simulador todavía no tiene un perfil de prueba.' });
+    return;
+  }
+  const t = p.transporte;
+  const e = p.estado();
+  useApp.setState({
+    fase: 'hoy',
+    enTelefono: true,
+    usuario: { uid: 'simulador', anonimo: true, email: null },
+    perfil,
+    enlace: t.enlace,
+    temperaturaC: e.temperaturaC,
+    bateria: e.bateria,
+    nivelMl: e.nivelMl,
+    firmwareTermo: e.firmware,
+  });
+  const salidas = [
+    t.alCambiarEnlace((enlace) => {
+      useApp.setState({ enlace });
+      if (enlace === 'conectado') {
+        const actual = useApp.getState().perfil;
+        if (actual) enviarPreferencias(actual);
+      }
+      // El simulador guarda el último lugar al perder el termo: se relee.
+      if (enlace === 'desconectado') setTimeout(() => void app.leerTermo(), 600);
+    }),
+    t.alRecibir((m) => {
+      if (m.tipo === 'estado') useApp.setState({ temperaturaC: m.temperaturaC, bateria: m.bateria, nivelMl: m.nivelMl });
+      if (m.tipo === 'hola') useApp.setState({ firmwareTermo: m.firmware });
+    }),
+    p.repositorio.escucharPendientes((pendientes) => useApp.setState({ pendientes })),
+    () => salirDia(),
+  ];
+  // El reloj del simulador puede ir a ×60: al cambiar de día, se escucha el nuevo.
+  let dia = '';
+  let salirDia = () => {};
+  const seguirDia = () => {
+    const hoy = claveDia(p.ahora(), perfil.desfaseMin);
+    if (hoy === dia) return;
+    dia = hoy;
+    salirDia();
+    salirDia = p.repositorio.escucharDia(hoy, (r) => useApp.setState({ hoyMl: r.totalMl, hoySorbos: r.sorbos, hoyListo: true }));
+  };
+  seguirDia();
+  const reloj = setInterval(seguirDia, 1000);
+  salidas.push(() => clearInterval(reloj));
+  const actualizador = new ActualizadorFirmware(t);
+  actualizador.alCambiar((actualizacion) => {
+    useApp.setState({ actualizacion });
+    if (actualizacion.fase === 'lista') setTimeout(() => void app.leerTermo(), 600);
+  });
+  conexion = {
+    cerrar: () => {
+      actualizador.detener();
+      for (const salir of salidas) salir();
+    },
+    resolver: (registro, decision) => p.resolver(registro, decision),
+    transporte: t,
+    actualizador,
+  };
+  // Si el simulador recarga el teléfono, sus oyentes no deben quedar colgados del canal.
+  addEventListener('pagehide', () => conexion?.cerrar());
+  if (t.enlace === 'conectado') enviarPreferencias(perfil);
+  void app.leerTermo();
+}
+
 export const app = {
   async iniciar(): Promise<void> {
+    const puente = puenteDelSimulador();
+    if (puente) return iniciarEnTelefono(puente).catch((e) => useApp.setState({ fase: 'error', error: mensaje(e) }));
     try {
       const { fb, servicios: s } = await servicios('app');
       const c = new fb.CuentaFirebase(s.auth);
@@ -408,6 +493,7 @@ export const app = {
 
   /** Manda un aviso de prueba a los celulares de la persona. */
   async probarAviso(): Promise<ResultadoEnvio> {
+    if (useApp.getState().enTelefono) return { ok: false, mensaje: 'En el simulador los avisos llegan solo a la app emparejada en otro celular.' };
     const canalId = app.canalId();
     const { servicios: s } = await servicios('app');
     const token = await s.auth.currentUser?.getIdToken();

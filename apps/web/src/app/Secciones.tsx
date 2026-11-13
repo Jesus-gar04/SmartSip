@@ -49,6 +49,8 @@ export function Termo() {
   const lugar = termo?.ultimoVisto?.lugar;
   const capacidad = termo?.capacidadMl ?? 393;
   const brillo = useApp((s) => s.perfil?.brillo ?? 'medio');
+  // En el teléfono del simulador solo hay un termo: el de al lado.
+  const enTelefono = useApp((s) => s.enTelefono);
   const grados = useGrados();
   const temp = temperaturaC !== null ? grados(temperaturaC) : '—';
 
@@ -125,7 +127,7 @@ export function Termo() {
         </article>
       </div>
       <SoftwareDelTermo />
-      <Boton onClick={app.emparejarOtro}>Conectar otro termo</Boton>
+      {!enTelefono && <Boton onClick={app.emparejarOtro}>Conectar otro termo</Boton>}
     </section>
   );
 }

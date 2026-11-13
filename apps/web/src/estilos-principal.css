@@ -208,6 +208,12 @@
   padding: var(--e6) var(--margen);
 }
 
+/* Con "¿Lo bebiste o lo vaciaste?" abierta, el papel deja sitio debajo para
+ * la cifra del agua: en pantallas bajas Hoy se alarga en vez de taparla. */
+.hoy-con-pregunta .hoy-papel {
+  padding-bottom: calc(var(--e6) + 300px);
+}
+
 .hoy-agua {
   position: absolute;
   inset: auto 0 0;

@@ -4,12 +4,28 @@ import { useTienda } from '../estado/tienda.ts';
 import { FranjaMensajes, LineaMensajes } from '../linea/LineaMensajes.tsx';
 import { PanelControles } from '../panel/PanelControles.tsx';
 import { cambiarModo, iniciarSimulador, modoInicial } from '../simulacion/arranque.ts';
-import { PantallaApp } from '../telefono/PantallaApp.tsx';
+import { TelefonoApp } from '../telefono/TelefonoApp.tsx';
 import { Escenario } from '../termo/Escenario.tsx';
-import { Segmentado } from '../ui/controles.tsx';
+import { Segmentado, Tarjeta } from '../ui/controles.tsx';
+import { IconoDatos } from '../ui/iconos.tsx';
 import { fechaLarga, hora } from '../util/formato.ts';
 
 let iniciado = false;
+
+function SelectorDatos() {
+  const modo = useTienda((s) => s.modo);
+  return (
+    <Segmentado
+      etiqueta="Dónde se guardan los datos"
+      valor={modo}
+      alCambiar={(m) => m !== modo && cambiarModo(m)}
+      opciones={[
+        { valor: 'memoria', etiqueta: 'En memoria' },
+        { valor: 'firebase', etiqueta: 'Firebase' },
+      ]}
+    />
+  );
+}
 
 /** /simulador: el termo, su consola y la línea de mensajes con la app. */
 
@@ -56,15 +72,9 @@ export function PaginaSimulador() {
           {conectado ? 'Conectado' : 'Sin conexión'}
           {climaC !== null && ` · ${climaC} °C`}
         </span>
-        <Segmentado
-          etiqueta="Dónde se guardan los datos"
-          valor={modo}
-          alCambiar={(m) => m !== modo && cambiarModo(m)}
-          opciones={[
-            { valor: 'memoria', etiqueta: 'En memoria' },
-            { valor: 'firebase', etiqueta: 'Firebase' },
-          ]}
-        />
+        <div className="cabecera-datos">
+          <SelectorDatos />
+        </div>
       </header>
 
       {fase === 'cargando' && (
@@ -95,13 +105,25 @@ export function PaginaSimulador() {
       <main className="escenario" data-pestana={remoto ? 'termo' : pestana} data-remoto={remoto}>
         <section className="col col-termo" aria-label="El termo">
           <Escenario />
-          <PanelControles />
+          <div className="col-consola">
+            <PanelControles />
+            {/* En el celular y la tablet el selector sale de la cabecera y viene aquí. */}
+            <div className="solo-compacto">
+              <Tarjeta
+                icono={<IconoDatos />}
+                titulo="Datos"
+                explica="En memoria todo vive en esta pestaña. Con Firebase, los sorbos se guardan en la nube."
+              >
+                <SelectorDatos />
+              </Tarjeta>
+            </div>
+          </div>
         </section>
         <LineaMensajes />
         {!remoto && (
           <section className="col col-app" aria-label="La app">
             <div className="telefono">
-              <PantallaApp marco />
+              <TelefonoApp marco />
             </div>
           </section>
         )}
